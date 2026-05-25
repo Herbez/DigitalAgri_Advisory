@@ -79,6 +79,12 @@ Add `OPENWEATHER_API_KEY at line 17  in `app.py` and configure your OpenWeather 
 - **Humidity:** 75 %
 - **Output:** The system might recommend **Irish Potato** (85% confidence) and **Beans** (12% confidence) based on the high altitude and volcanic soil typical of the Musanze region, validated against the official Rwanda Crop Whitelist.
 
+**Example Of Cooperative Admin:**
+
+```bash
+User: admin@ubumwe.rw
+password: 123456
+```
 
 ---
 
