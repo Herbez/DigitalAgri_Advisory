@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DigitalAgri — Admin Panel</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --green-900:#0D3320;--green-800:#14472D;--green-700:#1A5C3A;
+  --green-600:#1E7045;--green-500:#22884F;--green-400:#2BA563;
+  --green-300:#4FBF80;--green-200:#A8DFBF;--green-100:#D4EFE0;--green-50:#EEF8F3;
+
+  --sidebar-bg:#14472D;--sidebar-hover:rgba(255,255,255,0.09);
+  --sidebar-active:rgba(255,255,255,0.16);--sidebar-text:rgba(255,255,255,0.72);
+  --sidebar-text-active:#fff;
+
+  --topbar-bg:#fff;--topbar-border:#E8EDF0;
+  --bg:#F2F6F3;--surface:#fff;--surface-2:#F7FAF8;
+  --border:#E4EBE7;--border-2:#D0DDD6;
+  --text-primary:#0F2419;--text-secondary:#4A6355;--text-muted:#8BA898;
+
+  --blue:#3B82F6;--blue-light:#EFF6FF;
+  --amber:#F59E0B;--amber-light:#FFFBEB;
+  --rose:#F43F5E;--rose-light:#FFF1F2;
+  --violet:#8B5CF6;--violet-light:#F5F3FF;
+  --teal:#14B8A6;--teal-light:#F0FDFA;
+  --cyan:#06B6D4;--cyan-light:#ECFEFF;
+
+  --shadow-sm:0 1px 3px rgba(15,36,25,0.06),0 1px 2px rgba(15,36,25,0.04);
+  --shadow:0 4px 12px rgba(15,36,25,0.08),0 2px 4px rgba(15,36,25,0.04);
+  --shadow-md:0 8px 24px rgba(15,36,25,0.1),0 4px 8px rgba(15,36,25,0.05);
+  --shadow-lg:0 20px 48px rgba(15,36,25,0.12),0 8px 16px rgba(15,36,25,0.06);
+
+  --radius:12px;--radius-lg:16px;--radius-xl:20px;
+  --sidebar-w:248px;--topbar-h:64px;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --font-display:'Lora',Georgia,serif;
+  --transition:0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="dark"]{
+  --sidebar-bg:#0A2118;--sidebar-hover:rgba(255,255,255,0.07);
+  --sidebar-active:rgba(75,191,128,0.18);--sidebar-text:rgba(255,255,255,0.58);
+  --sidebar-text-active:#fff;
+  --topbar-bg:#0F1E16;--topbar-border:#1C3327;
+  --bg:#0C1A11;--surface:#112019;--surface-2:#162A1E;
+  --border:#1E3528;--border-2:#264538;
+  --text-primary:#E8F5EE;--text-secondary:#7BAF94;--text-muted:#4A7060;
+  --blue-light:#172554;--amber-light:#1C1400;--rose-light:#1F0A10;
+  --violet-light:#1B1030;--teal-light:#042F2E;--cyan-light:#083344;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.3);--shadow:0 4px 12px rgba(0,0,0,0.35);
+  --shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);
+}
+
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text-primary);transition:background var(--transition),color var(--transition)}
+
+/* ── APP SHELL ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-bg);
+  display:flex;flex-direction:column;z-index:20;position:relative;overflow:hidden;
+  transition:background var(--transition);
+}
+.sidebar::before{content:'';position:absolute;top:-80px;right:-60px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(75,191,128,0.1) 0%,transparent 70%);pointer-events:none}
+
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px 18px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.07)}
+.logo-mark{width:34px;height:34px;background:var(--green-400);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-name{font-family:var(--font-display);font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.2px}
+.logo-name span{color:var(--green-300)}
+.admin-badge{font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  background:rgba(245,158,11,0.25);color:#FCD34D;padding:2px 7px;border-radius:20px;margin-left:auto}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:6px 10px 8px}
+.sidebar-nav::-webkit-scrollbar{width:0}
+
+.section-label{font-size:10px;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.35);
+  text-transform:uppercase;padding:14px 8px 5px}
+
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;
+  cursor:pointer;transition:all var(--transition);color:var(--sidebar-text);
+  font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--sidebar-hover);color:var(--sidebar-text-active)}
+.nav-item.active{background:var(--sidebar-active);color:var(--sidebar-text-active)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:60%;background:var(--green-300);border-radius:0 3px 3px 0}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.8}
+.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:rgba(244,63,94,0.25);color:#FDA4AF;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.nav-badge.green{background:rgba(75,191,128,0.2);color:var(--green-200)}
+
+.sidebar-bottom{margin-top:auto;padding:10px;border-top:1px solid rgba(255,255,255,0.07)}
+.nav-item.logout{color:rgba(255,120,120,0.7)}
+.nav-item.logout:hover{background:rgba(244,63,94,0.1);color:#ff7b7b}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── TOPBAR ── */
+.topbar{height:var(--topbar-h);background:var(--topbar-bg);border-bottom:1px solid var(--topbar-border);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;z-index:10;
+  transition:background var(--transition),border-color var(--transition)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);flex:1}
+.breadcrumb a{color:var(--text-muted);text-decoration:none;transition:color var(--transition)}
+.breadcrumb a:hover{color:var(--green-500)}
+.breadcrumb .sep{font-size:11px}
+.breadcrumb .current{color:var(--text-primary);font-weight:700}
+
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--surface-2);
+  border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:36px;
+  transition:all var(--transition);width:220px}
+.search-bar:focus-within{border-color:var(--green-400);background:var(--surface);
+  box-shadow:0 0 0 3px rgba(43,165,99,0.1);width:260px}
+.search-bar input{border:none;background:transparent;font-family:var(--font);font-size:13px;
+  color:var(--text-primary);outline:none;flex:1;min-width:0}
+.search-bar input::placeholder{color:var(--text-muted)}
+.search-icon{color:var(--text-muted);flex-shrink:0}
+
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all var(--transition);position:relative}
+.icon-btn:hover{border-color:var(--green-400);color:var(--green-500);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;
+  background:var(--rose);border-radius:50%;border:2px solid var(--topbar-bg)}
+.theme-toggle{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all var(--transition);font-size:15px;font-family:var(--font)}
+.theme-toggle:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-1px)}
+.user-btn{display:flex;align-items:center;gap:9px;padding:0 12px 0 6px;height:38px;
+  border-radius:10px;border:1.5px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all var(--transition);font-size:13px;font-weight:600;color:var(--text-primary)}
+.user-btn:hover{border-color:var(--green-400);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.avatar{width:26px;height:26px;border-radius:7px;
+  background:linear-gradient(135deg,var(--amber),#D97706);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:26px 26px 48px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:10px}
+
+/* ── VIEWS ── */
+.view{display:none}
+.view.active{display:block;animation:fadeIn 0.28s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Page header */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-title{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-0.3px;margin-bottom:4px}
+.page-sub{font-size:13.5px;color:var(--text-muted)}
+.header-actions{display:flex;gap:10px;align-items:center}
+.btn-primary{display:flex;align-items:center;gap:7px;padding:0 16px;height:38px;
+  background:var(--green-500);color:#fff;border:none;border-radius:10px;font-family:var(--font);
+  font-size:13.5px;font-weight:600;cursor:pointer;transition:all var(--transition);
+  box-shadow:0 2px 8px rgba(34,136,79,0.3)}
+.btn-primary:hover{background:var(--green-600);transform:translateY(-1px);box-shadow:0 4px 14px rgba(34,136,79,0.4)}
+.btn-outline{display:flex;align-items:center;gap:7px;padding:0 14px;height:38px;
+  background:var(--surface);color:var(--text-secondary);border:1.5px solid var(--border);
+  border-radius:10px;font-family:var(--font);font-size:13.5px;font-weight:500;cursor:pointer;transition:all var(--transition)}
+.btn-outline:hover{border-color:var(--green-400);color:var(--green-600);transform:translateY(-1px)}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;margin-bottom:20px}
+@media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.stats-grid{grid-template-columns:1fr}}
+
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:18px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+  transition:all var(--transition);
+  animation:slideUp 0.5s ease both;cursor:default}
+.stat-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-md)}
+.sc-green:hover{border-color:var(--green-400)}
+.sc-blue:hover{border-color:var(--blue)}
+.sc-amber:hover{border-color:var(--amber)}
+.sc-rose:hover{border-color:var(--rose)}
+.sc-violet:hover{border-color:var(--violet)}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;
+  border-radius:0 0 var(--radius-lg) var(--radius-lg);opacity:1;transition:all var(--transition)}
+.stat-card:hover::after{height:6px}
+.sc-green::after{background:linear-gradient(90deg,var(--green-400),var(--green-300))}
+.sc-blue::after{background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.sc-amber::after{background:linear-gradient(90deg,var(--amber),#FCD34D)}
+.sc-rose::after{background:linear-gradient(90deg,var(--rose),#FB7185)}
+.sc-violet::after{background:linear-gradient(90deg,var(--violet),#A78BFA)}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}
+.stat-card:nth-child(5){animation-delay:.25s}
+
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:14px}
+.sc-green .stat-icon{background:var(--green-50);color:var(--green-600)}
+.sc-blue .stat-icon{background:var(--blue-light);color:var(--blue)}
+.sc-amber .stat-icon{background:var(--amber-light);color:var(--amber)}
+.sc-rose .stat-icon{background:var(--rose-light);color:var(--rose)}
+.sc-violet .stat-icon{background:var(--violet-light);color:var(--violet)}
+[data-theme="dark"] .sc-green .stat-icon{background:rgba(75,191,128,0.12)}
+[data-theme="dark"] .sc-blue .stat-icon{background:rgba(59,130,246,0.12)}
+[data-theme="dark"] .sc-amber .stat-icon{background:rgba(245,158,11,0.12)}
+[data-theme="dark"] .sc-rose .stat-icon{background:rgba(244,63,94,0.12)}
+[data-theme="dark"] .sc-violet .stat-icon{background:rgba(139,92,246,0.12)}
+
+.stat-label{font-size:10.5px;font-weight:700;letter-spacing:0.08em;color:var(--text-muted);
+  text-transform:uppercase;margin-bottom:5px}
+.stat-value{font-size:26px;font-weight:700;color:var(--text-primary);line-height:1;
+  margin-bottom:6px;font-variant-numeric:tabular-nums}
+.stat-note{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
+.delta{font-size:11.5px;font-weight:700;padding:2px 6px;border-radius:5px}
+.up{background:#ECFDF5;color:#059669}[data-theme="dark"] .up{background:rgba(5,150,105,0.15);color:#34D399}
+.down{background:#FFF1F2;color:#E11D48}[data-theme="dark"] .down{background:rgba(225,29,72,0.15);color:#FB7185}
+
+/* ── GRID ROWS ── */
+.row-2{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:16px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.row-2b{display:grid;grid-template-columns:2fr 3fr;gap:16px;margin-bottom:16px}
+@media(max-width:1100px){.row-2,.row-2b,.row-3{grid-template-columns:1fr}}
+
+/* ── CHART CARD ── */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;box-shadow:var(--shadow-sm);transition:box-shadow var(--transition),border-color var(--transition);
+  animation:slideUp 0.5s ease both}
+.chart-card:hover{box-shadow:var(--shadow)}
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-size:14.5px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+.chart-sub{font-size:12px;color:var(--text-muted)}
+.chart-wrap{position:relative;height:200px}
+.chart-wrap.tall{height:240px}
+.chart-wrap.short{height:160px}
+
+.pills{display:flex;gap:5px}
+.pill{font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:20px;cursor:pointer;
+  border:1.5px solid var(--border);color:var(--text-muted);background:transparent;
+  transition:all var(--transition);font-family:var(--font)}
+.pill:hover,.pill.active{background:var(--green-50);border-color:var(--green-400);color:var(--green-700)}
+[data-theme="dark"] .pill:hover,[data-theme="dark"] .pill.active{background:rgba(75,191,128,0.12);border-color:var(--green-500);color:var(--green-300)}
+
+/* ── USERS TABLE ── */
+.table-wrap{overflow-x:auto;margin-top:4px}
+table.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:0.07em;
+  text-transform:uppercase;color:var(--text-muted);padding:0 10px 10px 0;
+  border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table th:last-child{padding-right:0}
+.data-table td{padding:12px 10px 12px 0;border-bottom:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr{transition:background var(--transition);cursor:default;border-radius:8px}
+.data-table tbody tr:hover td{color:var(--text-primary);background:var(--surface-2)}
+
+.user-cell{display:flex;align-items:center;gap:10px}
+.u-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:11.5px;font-weight:700;color:#fff;flex-shrink:0}
+.u-name{font-weight:600;color:var(--text-primary);font-size:13.5px}
+.u-email{font-size:11.5px;color:var(--text-muted)}
+
+.status-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.s-active{background:#ECFDF5;color:#059669}[data-theme="dark"] .s-active{background:rgba(5,150,105,0.15);color:#34D399}
+.s-inactive{background:#F3F4F6;color:#6B7280}[data-theme="dark"] .s-inactive{background:rgba(107,114,128,0.15);color:#9CA3AF}
+.s-pending{background:#FFFBEB;color:#D97706}[data-theme="dark"] .s-pending{background:rgba(217,119,6,0.15);color:#FCD34D}
+
+.role-tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px}
+.r-farmer{background:var(--green-50);color:var(--green-700)}
+.r-extension{background:var(--blue-light);color:var(--blue)}
+.r-researcher{background:var(--violet-light);color:var(--violet)}
+[data-theme="dark"] .r-farmer{background:rgba(75,191,128,0.12);color:var(--green-300)}
+[data-theme="dark"] .r-extension{background:rgba(59,130,246,0.12);color:#93C5FD}
+[data-theme="dark"] .r-researcher{background:rgba(139,92,246,0.12);color:#C4B5FD}
+
+.action-btns{display:flex;gap:6px}
+.act-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);
+  transition:all var(--transition)}
+.act-btn:hover{border-color:var(--green-400);color:var(--green-600);transform:scale(1.1)}
+.act-btn.danger:hover{border-color:var(--rose);color:var(--rose)}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0 0;border-top:1px solid var(--border);margin-top:4px}
+.page-info{font-size:12.5px;color:var(--text-muted)}
+.page-btns{display:flex;gap:4px}
+.pg-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12.5px;
+  font-weight:500;color:var(--text-secondary);transition:all var(--transition);font-family:var(--font)}
+.pg-btn:hover,.pg-btn.active{background:var(--green-500);color:#fff;border-color:var(--green-500)}
+
+/* Table search/filter row */
+.table-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.filter-group{display:flex;gap:8px;align-items:center}
+.filter-select{height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:9px;
+  font-family:var(--font);font-size:13px;color:var(--text-secondary);background:var(--surface);
+  outline:none;cursor:pointer;transition:border-color var(--transition)}
+.filter-select:focus{border-color:var(--green-400)}
+
+/* Mini search */
+.mini-search{display:flex;align-items:center;gap:7px;height:34px;padding:0 11px;
+  border:1.5px solid var(--border);border-radius:9px;background:var(--surface);
+  transition:all var(--transition)}
+.mini-search:focus-within{border-color:var(--green-400);box-shadow:0 0 0 3px rgba(43,165,99,0.08)}
+.mini-search input{border:none;background:transparent;font-family:var(--font);
+  font-size:13px;color:var(--text-primary);outline:none;width:160px}
+.mini-search input::placeholder{color:var(--text-muted)}
+
+/* ── DISTRICT TABLE ── */
+.district-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.district-row:last-child{border-bottom:none}
+.district-rank{font-size:11px;font-weight:700;color:var(--text-muted);width:18px;text-align:center}
+.district-name{font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:90px}
+.district-bar-bg{flex:2;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.district-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green-500),var(--green-300));transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.district-count{font-size:12.5px;font-weight:700;color:var(--text-primary);min-width:28px;text-align:right}
+
+/* ── ACTIVITY FEED ── */
+.feed-item{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.feed-body{flex:1;min-width:0}
+.feed-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.feed-desc{font-size:12px;color:var(--text-muted);line-height:1.4}
+.feed-time{font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap}
+
+/* ── REPORT TABLE ── */
+.report-filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.report-pill{font-size:12.5px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;
+  border:1.5px solid var(--border);color:var(--text-muted);background:transparent;
+  transition:all var(--transition);font-family:var(--font)}
+.report-pill:hover,.report-pill.active{background:var(--green-50);border-color:var(--green-500);color:var(--green-700)}
+[data-theme="dark"] .report-pill:hover,[data-theme="dark"] .report-pill.active{background:rgba(75,191,128,0.12);border-color:var(--green-500);color:var(--green-300)}
+
+.export-btn{margin-left:auto;display:flex;align-items:center;gap:6px;padding:5px 14px;height:34px;
+  background:var(--surface);border:1.5px solid var(--border);border-radius:9px;
+  font-size:12.5px;font-weight:600;color:var(--text-secondary);cursor:pointer;
+  transition:all var(--transition);font-family:var(--font)}
+.export-btn:hover{border-color:var(--green-400);color:var(--green-600)}
+
+/* ── SYSTEM HEALTH ── */
+.health-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.health-row:last-child{border-bottom:none}
+.health-label{font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.health-val{font-size:13px;font-weight:700;color:var(--text-primary)}
+.health-indicator{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.h-good{background:#22C55E;box-shadow:0 0 6px rgba(34,197,94,0.5)}
+.h-warn{background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,0.5)}
+.h-bad{background:var(--rose);box-shadow:0 0 6px rgba(244,63,94,0.5)}
+.health-bar-wrap{display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end}
+.hb-bg{width:80px;height:5px;background:var(--surface-2);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.hb-fill{height:100%;border-radius:3px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
+
+/* ── TOP CROPS ── */
+.crop-bar-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.crop-bar-row:last-child{border-bottom:none}
+.crop-emoji{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+.crop-label{font-size:13px;font-weight:600;color:var(--text-primary);min-width:90px}
+.crop-bar-bg{flex:1;height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.crop-bar-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.crop-cnt{font-size:12px;font-weight:700;color:var(--text-muted);min-width:30px;text-align:right}
+
+/* ── PROVINCE SUMMARY ── */
+.province-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:1100px){.province-cards{grid-template-columns:repeat(3,1fr)}}
+.province-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;text-align:center;box-shadow:var(--shadow-sm);transition:all var(--transition);
+  animation:slideUp 0.5s ease both;cursor:default}
+.province-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.province-icon{font-size:22px;margin-bottom:7px}
+.province-name{font-size:11.5px;font-weight:700;color:var(--text-muted);letter-spacing:0.04em;margin-bottom:4px}
+.province-val{font-size:20px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+.province-sub{font-size:11px;color:var(--text-muted)}
+
+/* ── NOTIFICATION STRIP ── */
+.alert-strip{display:flex;align-items:center;gap:10px;background:rgba(245,158,11,0.08);
+  border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius);padding:11px 16px;
+  margin-bottom:20px;animation:slideUp 0.5s ease both}
+.alert-strip-icon{color:var(--amber);flex-shrink:0}
+.alert-strip-text{font-size:13.5px;color:var(--text-secondary)}<br>
+.alert-strip-text strong{color:var(--text-primary)}
+.alert-strip-close{margin-left:auto;cursor:pointer;color:var(--text-muted);background:none;border:none;font-size:18px;line-height:1;padding:0}
+.alert-strip-close:hover{color:var(--text-primary)}
+
+/* ── SECTION DIVIDER ── */
+.section-title{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Responsive */
+@media(max-width:720px){
+  :root{--sidebar-w:0px}
+  .sidebar{display:none}
+  .content{padding:14px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .province-cards{grid-template-columns:1fr 1fr}
+}
+
+/* Pulse animation */
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.85)}}
+.live-dot{width:7px;height:7px;background:#22C55E;border-radius:50%;display:inline-block;animation:pulse 2s infinite}
+</style>
+</head>
+<body>
+<div class="app">
+
+{% include 'cooperative/components/sidebar.html' %}
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div class="main">
+{% include 'cooperative/components/topbar.html' %}
+
+  <div class="content">
+
+    <!-- ════════════════ OVERVIEW VIEW ════════════════ -->
+    <div class="view active" id="view-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title"> {{ cooperative_name if cooperative_name else 'Cooperative' }} Admin Dashboard</div>
+          <div class="page-sub"><span class="live-dot"></span>&nbsp;Live data · Season A 2026 · Last updated just now</div>
+        </div>
+        <div class="header-actions">
+          <a class="btn-primary" href="{{ url_for('dashboard_farmers') }}" style="text-decoration: none;">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="8" r="3"/><path d="M4 18c0-3 2.7-5 6-5s6 2 6 5"/><line x1="16" y1="5" x2="16" y2="9"/><line x1="14" y1="7" x2="18" y2="7"/></svg>
+            Add Farmer
+          </a>
+        </div>
+      </div>
+
+
+      <!-- KPI Cards -->
+      <div class="stats-grid">
+        <div class="stat-card sc-green">
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="6" r="3"/><path d="M2 18c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="15" cy="7" r="2"/><path d="M18 18c0-2.2-1.3-4-3-5"/></svg></div>
+          <div class="stat-label">Total Farmers</div>
+          <div class="stat-value" id="kpi-users">0</div>
+          
+        </div>
+        <div class="stat-card sc-blue">
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="16" height="14" rx="2"/><line x1="2" y1="8" x2="18" y2="8"/><line x1="7" y1="3" x2="7" y2="8"/><line x1="13" y1="3" x2="13" y2="8"/></svg></div>
+          <div class="stat-label">Active This Season</div>
+          <div class="stat-value" id="kpi-active">0</div>
+          
+        </div>
+
+        <div class="stat-card sc-violet">
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="2,14 6,8 10,11 14,5 18,9"/></svg></div>
+          <div class="stat-label">AI Recommendations</div>
+          <div class="stat-value" id="kpi-recs">{{ total_recs }}</div>
+          
+        </div>
+        <div class="stat-card sc-rose">
+          <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5M2 17l10 5 10-5"/></svg></div>
+          <div class="stat-label">Avg. Farm Size (ha)</div>
+          <div class="stat-value" id="kpi-farm">{{ avg_farm_size }}</div>
+        </div>
+      </div>
+
+      <!-- Row: Registrations + Crop Confidence -->
+      <div class="row-2" style="animation-delay:.3s; grid-template-columns: 6fr 6fr;">
+        <div class="chart-card">
+             <div class="chart-header">
+            <div><div class="chart-title">Confidence Distribution</div><div class="chart-sub">AI prediction confidence levels</div></div>
+          </div>
+          <div class="chart-wrap" style="height:170px"><canvas id="roleChart"></canvas></div>
+          <div id="roleLegend" style="margin-top:14px;display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Top Crops Recommended</div><div class="chart-sub" id="topCropsSub">Platform-wide, All Seasons</div></div>
+            <div class="pills">
+              <button class="pill active" onclick="switchSeason(this,'total')">Total</button>
+              <button class="pill" onclick="switchSeason(this,'A')">A</button>
+              <button class="pill" onclick="switchSeason(this,'B')">B</button>
+              <button class="pill" onclick="switchSeason(this,'C')">C</button>
+            </div>
+          </div>
+          <div id="topCropsWrap" style="margin-top:4px"></div>
+        </div>
+
+      </div>
+
+      <!-- Row: District bar + Activity -->
+      <div class="row-2b" style="animation-delay:.4s">
+
+      </div>
+
+    <!-- ════════════════ USERS VIEW ════════════════ -->
+    <div class="view" id="view-users">
+      <div class="page-header">
+        <div><div class="page-title">User Management</div><div class="page-sub">Manage all registered farmers, extension workers, and researchers</div></div>
+        <div class="header-actions">
+          <button class="btn-outline">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 16l4-8 4 4 4-8"/></svg>
+            Export CSV
+          </button>
+          <a class="btn-primary" href="{{ url_for('dashboard_farmers') }}" style="text-decoration: none;">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="8" r="3"/><path d="M4 18c0-3 2.7-5 6-5s6 2 6 5"/><line x1="16" y1="4" x2="16" y2="8"/><line x1="14" y1="6" x2="18" y2="6"/></svg>
+            Add Farmer
+          </a>
+        </div>
+      </div>
+
+      <div class="chart-card" style="animation-delay:.1s">
+        <div class="table-controls">
+          <div class="mini-search">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><line x1="16" y1="16" x2="12.5" y2="12.5"/></svg>
+            <input type="text" placeholder="Search users…" oninput="filterUsers(this.value)"/>
+          </div>
+          <div class="filter-group">
+            <select class="filter-select" onchange="filterUsers()">
+              <option>All roles</option><option>Farmer</option><option>Extension Worker</option><option>Researcher</option>
+            </select>
+            <select class="filter-select" onchange="filterUsers()">
+              <option>All districts</option><option>Bugesera</option><option>Musanze</option><option>Huye</option><option>Rwamagana</option><option>Kayonza</option>
+            </select>
+            <select class="filter-select">
+              <option>All status</option><option>Active</option><option>Inactive</option><option>Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th><th>Role</th><th>District</th><th>Farm Size</th><th>Joined</th><th>Last Active</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <div class="page-info" id="pageInfo">Showing 1–10 of 1,347 users</div>
+          <div class="page-btns">
+            <button class="pg-btn">‹</button>
+            <button class="pg-btn active">1</button>
+            <button class="pg-btn">2</button>
+            <button class="pg-btn">3</button>
+            <button class="pg-btn">…</button>
+            <button class="pg-btn">135</button>
+            <button class="pg-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ ANALYTICS VIEW ════════════════ -->
+    <div class="view" id="view-analytics">
+      <div class="page-header">
+        <div><div class="page-title">Platform Analytics</div><div class="page-sub">Aggregated data on usage, crops, and system performance</div></div>
+        <div class="header-actions">
+          <button class="btn-outline">Export PDF</button>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="chart-card" style="animation-delay:.1s">
+          <div class="chart-header"><div><div class="chart-title">Monthly Active Users</div><div class="chart-sub">Unique logins per month</div></div></div>
+          <div class="chart-wrap tall"><canvas id="mauChart"></canvas></div>
+        </div>
+        <div class="chart-card" style="animation-delay:.15s">
+          <div class="chart-header"><div><div class="chart-title">Recommendations vs Confirmations</div><div class="chart-sub">How many farmers confirm AI picks</div></div></div>
+          <div class="chart-wrap tall"><canvas id="confChart"></canvas></div>
+        </div>
+      </div>
+      <div class="row-3">
+        <div class="chart-card" style="animation-delay:.2s">
+          <div class="chart-header"><div><div class="chart-title">Device Usage</div><div class="chart-sub">Mobile vs Desktop</div></div></div>
+          <div class="chart-wrap short"><canvas id="deviceChart"></canvas></div>
+        </div>
+        <div class="chart-card" style="animation-delay:.25s">
+          <div class="chart-header"><div><div class="chart-title">Session Duration</div><div class="chart-sub">Average minutes per session</div></div></div>
+          <div class="chart-wrap short"><canvas id="sessionChart"></canvas></div>
+        </div>
+        <div class="chart-card" style="animation-delay:.3s">
+          <div class="chart-header"><div><div class="chart-title">Feature Adoption</div><div class="chart-sub">% users using each feature</div></div></div>
+          <div class="chart-wrap short"><canvas id="featureChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ DISTRICTS VIEW ════════════════ -->
+    <div class="view" id="view-districts">
+      <div class="page-header">
+        <div><div class="page-title">District Overview</div><div class="page-sub">Farmer distribution and activity across all 30 Rwandan districts</div></div>
+        <div class="header-actions"><button class="btn-outline">Export Map</button></div>
+      </div>
+      <div class="row-2">
+        <div class="chart-card" style="animation-delay:.1s">
+          <div class="chart-header"><div><div class="chart-title">Farmers per District</div><div class="chart-sub">Top 10 districts by registered users</div></div></div>
+          <div class="chart-wrap tall"><canvas id="districtChart"></canvas></div>
+        </div>
+        <div class="chart-card" style="animation-delay:.15s">
+          <div class="chart-header"><div><div class="chart-title">District Breakdown</div><div class="chart-sub">Ranked by user count</div></div></div>
+          <div id="districtList" style="margin-top:4px"></div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="chart-card" style="animation-delay:.2s">
+          <div class="chart-header"><div><div class="chart-title">Avg Farm Size by District (ha)</div><div class="chart-sub">Mean hectares per farmer</div></div></div>
+          <div class="chart-wrap"><canvas id="farmSizeChart"></canvas></div>
+        </div>
+        <div class="chart-card" style="animation-delay:.25s">
+          <div class="chart-header"><div><div class="chart-title">Crop Diversity by Province</div><div class="chart-sub">Number of unique crop types recommended</div></div></div>
+          <div class="chart-wrap"><canvas id="diversityChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ CROPS VIEW ════════════════ -->
+    <div class="view" id="view-crops">
+      <div class="page-header">
+        <div><div class="page-title">Crop Advisory Management</div><div class="page-sub">AI model performance and crop recommendation statistics</div></div>
+        <div class="header-actions"><button class="btn-primary">Configure AI Model</button></div>
+      </div>
+      <div class="row-2">
+        <div class="chart-card" style="animation-delay:.1s">
+          <div class="chart-header"><div><div class="chart-title">Crop Recommendation Frequency</div><div class="chart-sub">Season A 2026 — all districts</div></div></div>
+          <div class="chart-wrap tall"><canvas id="cropFreqChart"></canvas></div>
+        </div>
+        <div class="chart-card" style="animation-delay:.15s">
+          <div class="chart-header"><div><div class="chart-title">Suitability Score Distribution</div><div class="chart-sub">How confident the AI is per crop</div></div></div>
+          <div class="chart-wrap tall"><canvas id="suitabilityChart"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card" style="animation-delay:.2s;margin-bottom:16px">
+        <div class="chart-header">
+          <div><div class="chart-title">Crop Performance Trend</div><div class="chart-sub">Multi-season suitability scores for top crops</div></div>
+        </div>
+        <div class="chart-wrap tall"><canvas id="cropTrendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ REPORTS VIEW ════════════════ -->
+    <div class="view" id="view-reports">
+      <div class="page-header">
+        <div><div class="page-title">Reports & Export</div><div class="page-sub">Generate and download platform reports</div></div>
+        <div class="header-actions"><button class="btn-primary">Schedule Report</button></div>
+      </div>
+
+      <div class="chart-card" style="animation-delay:.1s;margin-bottom:16px">
+        <div class="chart-header">
+          <div><div class="chart-title">Generated Reports</div><div class="chart-sub">All system reports — click to preview or download</div></div>
+        </div>
+        <div class="report-filters">
+          <button class="report-pill active">All</button>
+          <button class="report-pill">User Reports</button>
+          <button class="report-pill">Crop Reports</button>
+          <button class="report-pill">District Reports</button>
+          <button class="report-pill">System Logs</button>
+          <button class="export-btn">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 2v12M6 10l4 4 4-4"/><path d="M3 17h14"/></svg>
+            Bulk Export
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Report Name</th><th>Type</th><th>Period</th><th>Generated</th><th>Size</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="reportsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row-3" style="animation-delay:.2s">
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Quick Stats</div><div class="chart-sub">This month at a glance</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+            <div class="health-row"><div class="health-label">Reports generated</div><div class="health-val">148</div></div>
+            <div class="health-row"><div class="health-label">CSV exports</div><div class="health-val">63</div></div>
+            <div class="health-row"><div class="health-label">PDF exports</div><div class="health-val">41</div></div>
+            <div class="health-row"><div class="health-label">Scheduled reports</div><div class="health-val">12</div></div>
+            <div class="health-row"><div class="health-label">Failed exports</div><div class="health-val" style="color:var(--rose)">2</div></div>
+          </div>
+        </div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">System Health</div><div class="chart-sub">Live infrastructure status</div></div></div>
+          <div id="healthWrap2" style="margin-top:4px"></div>
+        </div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Export Format Usage</div><div class="chart-sub">Which formats are downloaded</div></div></div>
+          <div class="chart-wrap short"><canvas id="exportChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div>
+<!-- /app -->
+
+<script>
+/* ════ THEME ════ */
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';
+  setTimeout(redrawAllCharts,60);
+}
+
+/* ════ VIEW SWITCHER ════ */
+const viewNames={overview:'Dashboard',users:'User Management',analytics:'Analytics',districts:'Districts',crops:'Crop Advisory',reports:'Reports & Export'};
+function showView(name,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('breadcrumb-current').textContent=viewNames[name]||name;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  setTimeout(()=>initViewCharts(name),80);
+}
+
+/* ════ COUNTER ANIMATION ════ */
+function animCount(id,target,decimals=0){
+  const el=document.getElementById(id);if(!el)return;
+  let startTime=null,dur=1300;
+  function step(ts){
+    if(!startTime)startTime=ts;
+    const p=Math.min((ts-startTime)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    const val=ease*target;
+    el.textContent=decimals?val.toFixed(decimals):Math.round(val).toLocaleString();
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ════ CHART COLOR HELPERS ════ */
+function cv(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function gc(){return{text:cv('--text-primary'),muted:cv('--text-muted'),border:cv('--border')}}
+const PALETTE=['#22884F','#3B82F6','#F59E0B','#8B5CF6','#14B8A6','#F43F5E','#06B6D4','#EC4899'];
+const TOOLTIP={backgroundColor:'rgba(15,36,25,0.92)',titleColor:'#fff',bodyColor:'rgba(255,255,255,0.75)',padding:12,cornerRadius:10,boxPadding:4,titleFont:{size:12,family:'Plus Jakarta Sans'},bodyFont:{size:12,family:'Plus Jakarta Sans'}};
+function baseOpts(extra={}){
+  const c=gc();
+  return{responsive:true,maintainAspectRatio:false,animation:{duration:700,easing:'easeInOutQuart'},plugins:{legend:{display:false},tooltip:TOOLTIP},scales:{x:{grid:{color:c.border,lineWidth:0.5},border:{dash:[3,3]},ticks:{color:c.muted,font:{size:11,family:'Plus Jakarta Sans'}}},y:{grid:{color:c.border,lineWidth:0.5},border:{display:false,dash:[3,3]},ticks:{color:c.muted,font:{size:11},callback:v=>Number.isInteger(v)?v:v}}},...extra};
+}
+
+/* Track chart instances */
+const charts={};
+function safeChart(id,cfg){if(charts[id])charts[id].destroy();const ctx=document.getElementById(id);if(!ctx)return;charts[id]=new Chart(ctx,cfg);return charts[id]}
+function redrawAllCharts(){Object.keys(charts).forEach(id=>{const c=charts[id];if(c){c.options.plugins.tooltip=TOOLTIP;const gc2=gc();if(c.options.scales?.x)c.options.scales.x.grid.color=gc2.border;if(c.options.scales?.y)c.options.scales.y.grid.color=gc2.border;c.update()}})}
+
+/* ════ OVERVIEW CHARTS ════ */
+const regData6m={labels:['Oct','Nov','Dec','Jan','Feb','Mar'],data:[88,102,145,189,214,267]};
+const regData1y={labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],data:[40,55,62,70,85,90,88,102,145,189,214,267]};
+
+function buildRegChart(period='6m'){
+  const d=period==='6m'?regData6m:regData1y;
+  const c=gc();
+  safeChart('regChart',{type:'bar',data:{labels:d.labels,datasets:[{data:d.data,backgroundColor:d.data.map((_,i,a)=>i===a.length-1?'#22884F':'rgba(43,165,99,0.45)'),borderRadius:6,borderSkipped:false,hoverBackgroundColor:'#22884F'}]},options:{...baseOpts(),plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.parsed.y+' new users'}}}}});
+}
+
+function buildRoleChart(){
+  const roles = {{ confidence_distribution | tojson }};
+  if(!roles || roles.length === 0) return;
+  safeChart('roleChart',{type:'doughnut',data:{labels:roles.map(r=>r.label),datasets:[{data:roles.map(r=>r.val),backgroundColor:roles.map(r=>r.color),borderWidth:0,hoverOffset:8,borderRadius:4,spacing:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:{duration:900},plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+' predictions'}}}}});
+  const leg=document.getElementById('roleLegend');if(!leg)return;
+  leg.innerHTML=roles.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px;color:var(--text-secondary)"><div style="width:10px;height:10px;border-radius:3px;background:${r.color}"></div>${r.label}</div><div style="font-weight:700;color:var(--text-primary)">${r.val.toLocaleString()}</div></div>`).join('');
+}
+
+function buildAccuracyChart(){
+  const c=gc();
+  safeChart('accuracyChart',{type:'line',data:{labels:['Oct','Nov','Dec','Jan','Feb','Mar'],datasets:[{label:'Accuracy %',data:[78,81,84,87,89,92],borderColor:'#22884F',borderWidth:2.5,backgroundColor:function(ctx2){const g=ctx2.chart.ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'rgba(34,136,79,0.22)');g.addColorStop(1,'rgba(34,136,79,0.01)');return g},fill:true,tension:0.5,pointRadius:5,pointHoverRadius:8,pointBackgroundColor:'#22884F',pointBorderColor:'#fff',pointBorderWidth:2},{label:'Target %',data:[80,80,85,85,90,90],borderColor:'#F59E0B',borderWidth:1.5,borderDash:[5,4],backgroundColor:'transparent',fill:false,tension:0,pointRadius:0,pointHoverRadius:5}]},options:{...baseOpts(),plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:3,padding:14,font:{size:11.5,family:'Plus Jakarta Sans'},color:c.muted}},tooltip:{...TOOLTIP}},scales:{...baseOpts().scales,y:{...baseOpts().scales.y,min:70,max:100,ticks:{color:gc().muted,font:{size:11},callback:v=>v+'%'}}}}});
+}
+
+/* Top crops */
+const seasonalCropsData = {{ seasonal_crops_data | tojson }};
+let currentTopCrops = seasonalCropsData.total;
+
+function buildTopCrops(){
+  const wrap=document.getElementById('topCropsWrap');if(!wrap || !currentTopCrops || currentTopCrops.length === 0) {
+    if(wrap) wrap.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">No recommendation data yet</div>';
+    return;
+  }
+  const max=currentTopCrops[0].count;
+  wrap.innerHTML=currentTopCrops.map(c=>`<div class="crop-bar-row"><div class="crop-emoji">${c.emoji}</div><div class="crop-label">${c.name}</div><div class="crop-bar-bg"><div class="crop-bar-fill" style="width:0%;background:${c.color}" data-w="${Math.round(c.count/max*100)}%"></div></div><div class="crop-cnt">${c.count}</div></div>`).join('');
+  setTimeout(()=>document.querySelectorAll('.crop-bar-fill').forEach(b=>b.style.width=b.dataset.w),200);
+}
+
+function switchSeason(btn, season) {
+  // Update UI active state
+  btn.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // Update Subtitle
+  const sub = document.getElementById('topCropsSub');
+  if (season === 'total') sub.textContent = 'Platform-wide, All Seasons';
+  else sub.textContent = 'Platform-wide, Season ' + season;
+  
+  // Update Data and Redraw
+  currentTopCrops = seasonalCropsData[season];
+  buildTopCrops();
+}
+
+/* Activity feed */
+
+
+/* System health */
+const healthItems=[
+  {label:'API Server',indicator:'h-good',val:'99.8% uptime',pct:99,color:'#22C55E'},
+  {label:'AI Model API',indicator:'h-good',val:'97ms avg',pct:88,color:'#22C55E'},
+  {label:'Database',indicator:'h-good',val:'42% used',pct:42,color:'#3B82F6'},
+  {label:'Storage',indicator:'h-warn',val:'78% used',pct:78,color:'#F59E0B'},
+  {label:'Email Service',indicator:'h-good',val:'Operational',pct:100,color:'#22C55E'},
+  {label:'SMS Gateway',indicator:'h-good',val:'Operational',pct:100,color:'#22C55E'},
+];
+
+function buildHealth(id='healthWrap'){
+  const w=document.getElementById(id);if(!w)return;
+  w.innerHTML=healthItems.map(h=>`<div class="health-row"><div class="health-label"><div class="health-indicator ${h.indicator}"></div>${h.label}</div><div class="health-bar-wrap"><div class="hb-bg"><div class="hb-fill" style="width:0%;background:${h.color}" data-w="${h.pct}%"></div></div><div class="health-val" style="font-size:12px;min-width:90px;text-align:right">${h.val}</div></div></div>`).join('');
+  setTimeout(()=>w.querySelectorAll('.hb-fill').forEach(b=>b.style.width=b.dataset.w),300);
+}
+
+function switchReg(btn,period){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');buildRegChart(period)}
+
+/* ════ USERS TABLE ════ */
+const users=[
+  {name:'Amina Uwase',email:'a.uwase@example.rw',role:'farmer',district:'Bugesera',farm:'3.2',joined:'Jan 12, 2025',last:'Today',status:'active',avatar:'AU',color:'#22884F'},
+  {name:'Jean Habimana',email:'j.habimana@rw.net',role:'extension',district:'Musanze',farm:'—',joined:'Mar 4, 2025',last:'Yesterday',status:'active',avatar:'JH',color:'#3B82F6'},
+  {name:'Grace Iradukunda',email:'grace.ira@gmail.com',role:'farmer',district:'Huye',farm:'1.8',joined:'Nov 8, 2024',last:'2 days ago',status:'active',avatar:'GI',color:'#8B5CF6'},
+  {name:'Patrick Nkurunziza',email:'p.nkuru@yahoo.fr',role:'researcher',district:'Kigali',farm:'—',joined:'Feb 20, 2025',last:'4 hrs ago',status:'active',avatar:'PN',color:'#14B8A6'},
+  {name:'Claudette Mukamana',email:'claudette@farm.rw',role:'farmer',district:'Rwamagana',farm:'5.0',joined:'Dec 1, 2024',last:'1 week ago',status:'inactive',avatar:'CM',color:'#F59E0B'},
+  {name:'Eric Nizeyimana',email:'e.nize@example.com',role:'farmer',district:'Kayonza',farm:'2.5',joined:'Mar 15, 2026',last:'Never',status:'pending',avatar:'EN',color:'#F43F5E'},
+  {name:'Solange Uwimana',email:'solange.u@rw.co',role:'extension',district:'Gicumbi',farm:'—',joined:'Jan 28, 2025',last:'3 days ago',status:'active',avatar:'SU',color:'#06B6D4'},
+  {name:'Alexis Mugisha',email:'alexis@farmrw.com',role:'farmer',district:'Nyagatare',farm:'8.3',joined:'Oct 10, 2024',last:'Today',status:'active',avatar:'AM',color:'#22884F'},
+  {name:'Diane Umuhoza',email:'diane.umuho@example.rw',role:'farmer',district:'Karongi',farm:'1.1',joined:'Mar 18, 2026',last:'Never',status:'pending',avatar:'DU',color:'#EC4899'},
+  {name:'Théodore Hakizimana',email:'theo.haki@gmail.com',role:'researcher',district:'Rubavu',farm:'—',joined:'Sep 5, 2024',last:'Today',status:'active',avatar:'TH',color:'#8B5CF6'},
+];
+
+const roleMap={farmer:'r-farmer',extension:'r-extension',researcher:'r-researcher'};
+const roleLabel={farmer:'Farmer',extension:'Extension Worker',researcher:'Researcher'};
+const statusMap={active:'s-active Active',inactive:'s-inactive Inactive',pending:'s-pending Pending'};
+
+function buildUsersTable(data=users){
+  const tbody=document.getElementById('usersTableBody');if(!tbody)return;
+  tbody.innerHTML=data.map(u=>{
+    const[sc,sl]=statusMap[u.status].split(' ');
+    return`<tr>
+      <td><div class="user-cell"><div class="u-avatar" style="background:${u.color}">${u.avatar}</div><div><div class="u-name">${u.name}</div><div class="u-email">${u.email}</div></div></div></td>
+      <td><span class="role-tag ${roleMap[u.role]}">${roleLabel[u.role]}</span></td>
+      <td>${u.district}</td>
+      <td>${u.farm} ${u.farm!=='—'?'ha':''}</td>
+      <td>${u.joined}</td>
+      <td>${u.last}</td>
+      <td><span class="status-badge ${sc}">${sl}</span></td>
+      <td><div class="action-btns">
+        <button class="act-btn" title="View"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="act-btn" title="Edit"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 5l4 4L7 17H3v-4L11 5z"/></svg></button>
+        <button class="act-btn danger" title="Remove"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="3,6 5,6 19,6"/><path d="M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(q=''){buildUsersTable(users.filter(u=>!q||u.name.toLowerCase().includes(q.toLowerCase())||u.email.toLowerCase().includes(q.toLowerCase())))}
+
+/* ════ DISTRICT CHARTS ════ */
+const districtData=[
+  {name:'Bugesera',count:182},{name:'Nyagatare',count:168},{name:'Musanze',count:154},
+  {name:'Huye',count:143},{name:'Rwamagana',count:131},{name:'Kayonza',count:124},
+  {name:'Gicumbi',count:118},{name:'Rubavu',count:112},{name:'Rusizi',count:98},{name:'Muhanga',count:87},
+];
+
+function buildDistrictChart(){
+  const c=gc();
+  safeChart('districtChart',{type:'bar',data:{labels:districtData.map(d=>d.name),datasets:[{data:districtData.map(d=>d.count),backgroundColor:districtData.map((_,i)=>i===0?'#22884F':PALETTE[i%PALETTE.length]+'99'),borderRadius:6,borderSkipped:false,hoverBackgroundColor:districtData.map((_,i)=>PALETTE[i%PALETTE.length])}]},options:{...baseOpts(),indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.parsed.x+' farmers'}}},scales:{x:{grid:{color:c.border,lineWidth:0.5},border:{dash:[3,3]},ticks:{color:c.muted,font:{size:11}}},y:{grid:{display:false},border:{display:false},ticks:{color:c.muted,font:{size:11.5}}}}}});
+}
+
+function buildDistrictList(){
+  const dl=document.getElementById('districtList');if(!dl)return;
+  const max=districtData[0].count;
+  dl.innerHTML=districtData.map((d,i)=>`<div class="district-row"><div class="district-rank">${i+1}</div><div class="district-name">${d.name}</div><div class="district-bar-bg"><div class="district-bar-fill" style="width:0%" data-w="${Math.round(d.count/max*100)}%"></div></div><div class="district-count">${d.count}</div></div>`).join('');
+  setTimeout(()=>dl.querySelectorAll('.district-bar-fill').forEach(b=>b.style.width=b.dataset.w),300);
+}
+
+function buildFarmSizeChart(){
+  const c=gc();
+  safeChart('farmSizeChart',{type:'bar',data:{labels:['Bugesera','Nyagatare','Musanze','Huye','Rwamagana','Kayonza','Gicumbi','Rubavu'],datasets:[{data:[4.2,5.8,2.1,2.6,3.4,4.9,2.8,1.9],backgroundColor:'rgba(43,165,99,0.55)',borderRadius:6,borderSkipped:false,hoverBackgroundColor:'#22884F'}]},options:{...baseOpts(),plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.parsed.y+'ha avg'}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:c.muted,font:{size:11}}},y:{grid:{color:c.border,lineWidth:0.5},border:{display:false,dash:[3,3]},ticks:{color:c.muted,font:{size:11},callback:v=>v+'ha'}}}}});
+}
+
+function buildDiversityChart(){
+  const c=gc();
+  safeChart('diversityChart',{type:'radar',data:{labels:['Eastern','Northern','Southern','Western','Kigali'],datasets:[{label:'Unique Crops',data:[8,6,9,7,5],borderColor:'#22884F',borderWidth:2,backgroundColor:'rgba(34,136,79,0.15)',pointBackgroundColor:'#22884F',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5},{label:'Season B\'25',data:[7,5,8,6,4],borderColor:'#3B82F6',borderWidth:1.5,borderDash:[4,3],backgroundColor:'transparent',pointRadius:3,pointBackgroundColor:'#3B82F6'}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:700},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:3,padding:14,font:{size:11.5,family:'Plus Jakarta Sans'},color:c.muted}},tooltip:{...TOOLTIP}},scales:{r:{grid:{color:c.border},angleLines:{color:c.border},ticks:{backdropColor:'transparent',color:c.muted,font:{size:10}},pointLabels:{color:c.muted,font:{size:11.5}}}}}});
+}
+
+/* ════ ANALYTICS CHARTS ════ */
+function buildMAUChart(){
+  const c=gc();
+  safeChart('mauChart',{type:'line',data:{labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],datasets:[{label:'Active Users',data:[320,380,410,390,440,480,510,560,620,720,850,980],borderColor:'#22884F',borderWidth:2.5,backgroundColor:function(ctx2){const g=ctx2.chart.ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'rgba(34,136,79,0.2)');g.addColorStop(1,'rgba(34,136,79,0.01)');return g},fill:true,tension:0.5,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#22884F',pointBorderColor:'#fff',pointBorderWidth:2}]},options:{...baseOpts(),plugins:{legend:{display:false},tooltip:{...TOOLTIP}}}});
+}
+
+function buildConfChart(){
+  const c=gc();
+  safeChart('confChart',{type:'bar',data:{labels:['Oct','Nov','Dec','Jan','Feb','Mar'],datasets:[{label:'Recommendations',data:[420,510,580,640,730,892],backgroundColor:'rgba(43,165,99,0.5)',borderRadius:4,borderSkipped:false},{label:'Confirmed by Farmers',data:[310,395,468,530,620,780],backgroundColor:'rgba(59,130,246,0.6)',borderRadius:4,borderSkipped:false}]},options:{...baseOpts(),plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:11.5,family:'Plus Jakarta Sans'},color:c.muted,usePointStyle:true}},tooltip:{...TOOLTIP}}}});
+}
+
+function buildDeviceChart(){
+  safeChart('deviceChart',{type:'doughnut',data:{labels:['Mobile','Desktop','Tablet'],datasets:[{data:[68,24,8],backgroundColor:['#22884F','#3B82F6','#F59E0B'],borderWidth:0,hoverOffset:6,borderRadius:3,spacing:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',animation:{duration:700},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:8,boxHeight:8,padding:10,font:{size:11,family:'Plus Jakarta Sans'},color:gc().muted,usePointStyle:true}},tooltip:{...TOOLTIP}}}});
+}
+
+function buildSessionChart(){
+  const c=gc();
+  safeChart('sessionChart',{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:[4.2,5.1,4.8,6.3,5.7,3.2,2.8],borderColor:'#8B5CF6',borderWidth:2,backgroundColor:'rgba(139,92,246,0.12)',fill:true,tension:0.5,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#8B5CF6',pointBorderColor:'#fff',pointBorderWidth:2}]},options:{...baseOpts(),plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.parsed.y+' min avg'}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:c.muted,font:{size:11}}},y:{grid:{color:c.border,lineWidth:0.5},border:{display:false,dash:[3,3]},ticks:{color:c.muted,font:{size:11},callback:v=>v+'m'}}}}});
+}
+
+function buildFeatureChart(){
+  const c=gc();
+  safeChart('featureChart',{type:'bar',data:{labels:['Crop Advisor','Calendar','Weather','History','Community','Market'],datasets:[{data:[92,74,68,55,38,31],backgroundColor:PALETTE.map(p=>p+'aa'),borderRadius:5,borderSkipped:false,hoverBackgroundColor:PALETTE}]},options:{...baseOpts(),indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.parsed.x+'% users'}}},scales:{x:{grid:{color:c.border,lineWidth:0.5},border:{dash:[3,3]},ticks:{color:c.muted,font:{size:11},callback:v=>v+'%'}},y:{grid:{display:false},border:{display:false},ticks:{color:c.muted,font:{size:11}}}}}});
+}
+
+/* ════ CROPS CHARTS ════ */
+function buildCropFreqChart(){
+  const c=gc();
+  safeChart('cropFreqChart',{type:'bar',data:{labels:['Cassava','Maize','Beans','Sweet Potato','Sorghum','Rice','Groundnut','Banana'],datasets:[{data:[892,734,611,498,312,187,143,98],backgroundColor:PALETTE.map(p=>p+'bb'),borderRadius:6,borderSkipped:false,hoverBackgroundColor:PALETTE}]},options:{...baseOpts(),plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.parsed.y.toLocaleString()+' recommendations'}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:c.muted,font:{size:11}}},y:{grid:{color:c.border,lineWidth:0.5},border:{display:false,dash:[3,3]},ticks:{color:c.muted,font:{size:11}}}}}});
+}
+
+function buildSuitabilityChart(){
+  safeChart('suitabilityChart',{type:'doughnut',data:{labels:['90–100%','70–89%','50–69%','<50%'],datasets:[{data:[38,44,13,5],backgroundColor:['#22884F','#4FBF80','#F59E0B','#F43F5E'],borderWidth:0,hoverOffset:8,borderRadius:4,spacing:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',animation:{duration:900},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:11.5,family:'Plus Jakarta Sans'},color:gc().muted,usePointStyle:true}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+'% of recs'}}}}});
+}
+
+function buildCropTrendChart(){
+  const c=gc();
+  safeChart('cropTrendChart',{type:'line',data:{labels:["S.B'24","S.A'25","S.B'25","S.A'26"],datasets:[
+    {label:'Cassava',data:[78,88,92,97],borderColor:'#22884F',borderWidth:2.5,tension:0.5,pointRadius:5,pointHoverRadius:8,pointBackgroundColor:'#22884F',pointBorderColor:'#fff',pointBorderWidth:2,fill:false},
+    {label:'Maize',data:[70,74,80,83],borderColor:'#3B82F6',borderWidth:2,tension:0.5,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#3B82F6',pointBorderColor:'#fff',pointBorderWidth:2,fill:false},
+    {label:'Beans',data:[60,66,72,74],borderColor:'#F59E0B',borderWidth:2,tension:0.5,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#F59E0B',pointBorderColor:'#fff',pointBorderWidth:2,fill:false},
+    {label:'Sweet Potato',data:[55,60,65,68],borderColor:'#8B5CF6',borderWidth:2,tension:0.5,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#8B5CF6',pointBorderColor:'#fff',pointBorderWidth:2,fill:false},
+    {label:'Sorghum',data:[48,50,53,55],borderColor:'#14B8A6',borderWidth:1.5,borderDash:[4,3],tension:0.5,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#14B8A6',pointBorderColor:'#fff',pointBorderWidth:2,fill:false},
+  ]},options:{...baseOpts(),plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:11.5,family:'Plus Jakarta Sans'},color:c.muted,usePointStyle:true}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{x:{grid:{color:c.border,lineWidth:0.5},border:{dash:[3,3]},ticks:{color:c.muted,font:{size:11.5}}},y:{min:40,max:100,grid:{color:c.border,lineWidth:0.5},border:{display:false,dash:[3,3]},ticks:{color:c.muted,font:{size:11},callback:v=>v+'%'}}}}});
+}
+
+/* ════ REPORTS TABLE ════ */
+const reports=[
+  {name:'Monthly Platform Summary — March 2026',type:'Platform',period:'March 2026',generated:'Apr 1, 2026',size:'2.4 MB',status:'ready'},
+  {name:'User Registrations by District Q1 2026',type:'Users',period:'Q1 2026',generated:'Apr 2, 2026',size:'1.1 MB',status:'ready'},
+  {name:'Crop Recommendation Accuracy Report',type:'Crops',period:'Season A 2026',generated:'Apr 3, 2026',size:'3.2 MB',status:'ready'},
+  {name:'Eastern Province Farmer Activity',type:'Districts',period:'Mar 2026',generated:'Apr 2, 2026',size:'890 KB',status:'ready'},
+  {name:'AI Model Performance Review',type:'System',period:'Q1 2026',generated:'Apr 4, 2026',size:'5.1 MB',status:'processing'},
+  {name:'Weather Impact on Crop Confidence',type:'Crops',period:'Season B 2025',generated:'Jan 15, 2026',size:'2.8 MB',status:'ready'},
+  {name:'User Retention & Churn Analysis',type:'Users',period:'2025 Full Year',generated:'Feb 3, 2026',size:'1.9 MB',status:'ready'},
+];
+const rTypeColor={Platform:'#22884F',Users:'#3B82F6',Crops:'#F59E0B',Districts:'#8B5CF6',System:'#14B8A6'};
+const rTypeBg={Platform:'var(--green-50)',Users:'var(--blue-light)',Crops:'var(--amber-light)',Districts:'var(--violet-light)',System:'var(--teal-light)'};
+
+function buildReportsTable(){
+  const tbody=document.getElementById('reportsTableBody');if(!tbody)return;
+  tbody.innerHTML=reports.map(r=>`<tr>
+    <td style="font-weight:600;color:var(--text-primary);max-width:240px">${r.name}</td>
+    <td><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:6px;background:${rTypeBg[r.type]};color:${rTypeColor[r.type]}">${r.type}</span></td>
+    <td>${r.period}</td><td>${r.generated}</td><td>${r.size}</td>
+    <td>${r.status==='ready'?'<span class="status-badge s-active">Ready</span>':'<span class="status-badge s-pending">Processing</span>'}</td>
+    <td><div class="action-btns">
+      <button class="act-btn" title="Preview"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 10s4-7 9-7 9 7 9 7-4 7-9 7-9-7-9-7z"/><circle cx="10" cy="10" r="3"/></svg></button>
+      <button class="act-btn" title="Download"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M3 17h14"/></svg></button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function buildExportChart(){
+  safeChart('exportChart',{type:'doughnut',data:{labels:['PDF','CSV','Excel','JSON'],datasets:[{data:[41,63,28,16],backgroundColor:['#22884F','#3B82F6','#F59E0B','#8B5CF6'],borderWidth:0,hoverOffset:6,borderRadius:3,spacing:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',animation:{duration:700},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:8,boxHeight:8,padding:10,font:{size:11,family:'Plus Jakarta Sans'},color:gc().muted,usePointStyle:true}},tooltip:{...TOOLTIP}}}});
+}
+
+/* ════ INIT CHARTS PER VIEW ════ */
+function initViewCharts(view){
+  if(view==='overview'){buildRegChart();buildRoleChart();buildAccuracyChart();buildTopCrops();buildActivity();buildHealth('healthWrap');}
+  else if(view==='users'){buildUsersTable();}
+  else if(view==='analytics'){buildMAUChart();buildConfChart();buildDeviceChart();buildSessionChart();buildFeatureChart();}
+  else if(view==='districts'){buildDistrictChart();buildDistrictList();buildFarmSizeChart();buildDiversityChart();}
+  else if(view==='crops'){buildCropFreqChart();buildSuitabilityChart();buildCropTrendChart();}
+  else if(view==='reports'){buildReportsTable();buildExportChart();buildHealth('healthWrap2');}
+}
+
+/* ════ BOOT ════ */
+window.addEventListener('load',()=>{
+    animCount('kpi-users', {{ total_farmers }});
+    animCount('kpi-active', {{ total_farmers }}); // Using total_farmers as a proxy for active
+    animCount('kpi-districts', 30); // Rwanda has 30 districts
+    animCount('kpi-recs', {{ total_recs }});
+    animCount('kpi-farm', {{ avg_farm_size }}, 1);
+    initViewCharts('overview');
+
+  // Report pill interactivity
+  document.querySelectorAll('.report-pill').forEach(p=>{
+    p.addEventListener('click',()=>{document.querySelectorAll('.report-pill').forEach(x=>x.classList.remove('active'));p.classList.add('active')});
+  });
+});
+</script>
+</body>
+</html>

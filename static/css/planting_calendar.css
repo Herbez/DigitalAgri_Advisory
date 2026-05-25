@@ -1,0 +1,510 @@
+/* ── SEASON SWITCHER ── */
+.season-switcher-container{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  margin-bottom:22px;
+  box-shadow:var(--shadow-sm);
+}
+
+.season-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.season-title{
+  font-size:16px;
+  font-weight:700;
+  color:var(--text-primary);
+}
+
+.season-district{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-muted);
+  background:var(--surface-2);
+  padding:6px 12px;
+  border-radius:20px;
+}
+
+.season-tabs{
+  display:flex;
+  gap:12px;
+}
+
+.season-tab{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:16px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  background:transparent;
+  cursor:pointer;
+  transition:all var(--transition);
+  position:relative;
+}
+
+.season-tab:hover{
+  border-color:var(--green-400);
+  transform:translateY(-2px);
+}
+
+.season-tab.active{
+  border-color:var(--green-500);
+  background:linear-gradient(135deg,var(--green-50),var(--green-100));
+}
+
+[data-theme="dark"] .season-tab.active{
+  background:linear-gradient(135deg,rgba(75,191,128,0.12),rgba(75,191,128,0.18));
+  border-color:var(--green-500);
+}
+
+.season-label{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text-primary);
+}
+
+.season-status{
+  font-size:11px;
+  font-weight:600;
+  padding:3px 10px;
+  border-radius:12px;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+
+.season-status.active{
+  background:var(--green-100);
+  color:var(--green-700);
+}
+
+[data-theme="dark"] .season-status.active{
+  background:rgba(75,191,128,0.2);
+  color:var(--green-300);
+}
+
+.season-status.upcoming{
+  background:var(--blue-light);
+  color:var(--blue);
+}
+
+[data-theme="dark"] .season-status.upcoming{
+  background:rgba(59,130,246,0.15);
+  color:var(--blue);
+}
+
+.season-status.closed{
+  background:var(--surface-2);
+  color:var(--text-muted);
+}
+
+.season-dates{
+  font-size:12px;
+  color:var(--text-muted);
+}
+
+/* ── GANTT CALENDAR ── */
+.calendar-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:22px;
+  margin-bottom:22px;
+  box-shadow:var(--shadow-sm);
+}
+
+.calendar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:20px;
+}
+
+.calendar-title{
+  font-size:16px;
+  font-weight:700;
+  color:var(--text-primary);
+  margin-bottom:4px;
+}
+
+.calendar-sub{
+  font-size:13px;
+  color:var(--text-muted);
+}
+
+.calendar-legend{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:var(--text-secondary);
+}
+
+.legend-dot{
+  width:10px;
+  height:10px;
+  border-radius:3px;
+}
+
+.gantt-container{
+  position:relative;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--surface-2);
+}
+
+.gantt-header{
+  display:flex;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+}
+
+.gantt-crop-col{
+  width:120px;
+  padding:12px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--text-muted);
+  border-right:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.gantt-weeks{
+  flex:1;
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+}
+
+.gantt-week{
+  padding:10px;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-muted);
+  text-align:center;
+  border-right:1px solid var(--border);
+}
+
+.gantt-week:last-child{
+  border-right:none;
+}
+
+.gantt-body{
+  position:relative;
+}
+
+.gantt-row{
+  display:flex;
+  border-bottom:1px solid var(--border);
+  min-height:48px;
+}
+
+.gantt-row:last-child{
+  border-bottom:none;
+}
+
+.gantt-crop-name{
+  width:120px;
+  padding:12px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-primary);
+  border-right:1px solid var(--border);
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+}
+
+.gantt-bars{
+  flex:1;
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+}
+
+.gantt-bar{
+  position:absolute;
+  height:24px;
+  top:50%;
+  transform:translateY(-50%);
+  border-radius:6px;
+  opacity:0.85;
+  transition:opacity var(--transition);
+}
+
+.gantt-bar:hover{
+  opacity:1;
+}
+
+.today-marker{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:2px;
+  background:var(--rose);
+  z-index:10;
+  pointer-events:none;
+}
+
+.today-line{
+  width:2px;
+  height:100%;
+  background:var(--rose);
+}
+
+.today-label{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:var(--rose);
+  color:#fff;
+  font-size:10px;
+  font-weight:600;
+  padding:3px 8px;
+  border-radius:4px;
+  white-space:nowrap;
+}
+
+/* ── RAINFALL CHART ── */
+.rainfall-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:22px;
+  margin-bottom:22px;
+  box-shadow:var(--shadow-sm);
+}
+
+.rainfall-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:16px;
+}
+
+.rainfall-title{
+  font-size:16px;
+  font-weight:700;
+  color:var(--text-primary);
+  margin-bottom:4px;
+}
+
+.rainfall-sub{
+  font-size:13px;
+  color:var(--text-muted);
+}
+
+.rainfall-indicator{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:2px;
+}
+
+.rainfall-value{
+  font-size:18px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+
+.rainfall-value.positive{
+  color:#059669;
+}
+
+.rainfall-value.negative{
+  color:#E11D48;
+}
+
+.rainfall-label{
+  font-size:11px;
+  color:var(--text-muted);
+}
+
+.rainfall-warning{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  background:var(--amber-light);
+  border:1px solid var(--amber);
+  border-radius:8px;
+  margin-bottom:16px;
+  font-size:12px;
+  color:var(--amber);
+  font-weight:500;
+}
+
+[data-theme="dark"] .rainfall-warning{
+  background:rgba(245,158,11,0.15);
+  border-color:rgba(245,158,11,0.3);
+  color:var(--amber);
+}
+
+.rainfall-chart{
+  height:250px;
+}
+
+/* ── NEIGHBOUR COMPARISON ── */
+.neighbour-comparison{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  margin-bottom:22px;
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+}
+
+.neighbour-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+  cursor:pointer;
+  transition:background var(--transition);
+}
+
+.neighbour-header:hover{
+  background:var(--surface-2);
+}
+
+.neighbour-title{
+  font-size:15px;
+  font-weight:700;
+  color:var(--text-primary);
+  margin-bottom:2px;
+}
+
+.neighbour-sub{
+  font-size:12px;
+  color:var(--text-muted);
+}
+
+.neighbour-toggle{
+  transition:transform var(--transition);
+}
+
+.neighbour-content{
+  padding:0 22px 22px;
+  transition:all var(--transition);
+}
+
+.neighbour-content.collapsed{
+  display:none;
+}
+
+.neighbour-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.neighbour-item{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  transition:all var(--transition);
+}
+
+.neighbour-item:hover{
+  border-color:var(--green-400);
+  transform:translateY(-2px);
+}
+
+.neighbour-district{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text-primary);
+  margin-bottom:6px;
+}
+
+.neighbour-window{
+  font-size:12px;
+  color:var(--text-secondary);
+  margin-bottom:6px;
+}
+
+.neighbour-status{
+  font-size:11px;
+  font-weight:600;
+  padding:3px 8px;
+  border-radius:6px;
+  display:inline-block;
+}
+
+.neighbour-status{
+  background:var(--green-100);
+  color:var(--green-700);
+}
+
+[data-theme="dark"] .neighbour-status{
+  background:rgba(75,191,128,0.15);
+  color:var(--green-300);
+}
+
+.neighbour-status.early{
+  background:var(--blue-light);
+  color:var(--blue);
+}
+
+[data-theme="dark"] .neighbour-status.early{
+  background:rgba(59,130,246,0.15);
+  color:var(--blue);
+}
+
+.neighbour-status.late{
+  background:var(--amber-light);
+  color:var(--amber);
+}
+
+[data-theme="dark"] .neighbour-status.late{
+  background:rgba(245,158,11,0.15);
+  color:var(--amber);
+}
+
+/* Responsive */
+@media(max-width:1100px){
+  .neighbour-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:720px){
+  .season-tabs{
+    flex-direction:column;
+  }
+  
+  .calendar-legend{
+    display:none;
+  }
+  
+  .gantt-weeks{
+    grid-template-columns:repeat(6,1fr);
+  }
+  
+  .gantt-bars{
+    grid-template-columns:repeat(6,1fr);
+  }
+  
+  .neighbour-grid{
+    grid-template-columns:1fr;
+  }
+  
+  .rainfall-header{
+    flex-direction:column;
+    gap:12px;
+  }
+}

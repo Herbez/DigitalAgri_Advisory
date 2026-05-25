@@ -1,0 +1,977 @@
+{
+  "meta": {
+    "title": "Rwanda District Crop Whitelist",
+    "source": "NISR Seasonal Agricultural Survey Annual Report 2024",
+    "citation": "National Institute of Statistics of Rwanda (NISR). Seasonal Agricultural Survey \u2014 Annual Report 2024. Kigali: NISR, February 2025. Available at: https://statistics.gov.rw",
+    "basis": "Cultivated area (Ha) per district per season, adjusted by RAB agro-ecological zone classifications",
+    "seasons": {
+      "Season_A": "September \u2013 February (long rains)",
+      "Season_B": "March \u2013 June (short rains)",
+      "Season_C": "July \u2013 September (dry season, irrigated/swamp crops)"
+    },
+    "note": "Crops listed per district are historically cultivated crops validated against NISR SAS 2024 and RAB zone data. Used as a whitelist filter for ML model output \u2014 any ML prediction not in this list for the given district and season is replaced by the next valid ML prediction."
+  },
+  "districts": {
+    "Burera": {
+      "Season_A": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Wheat",
+          "Maize",
+          "Sorghum"
+        ],
+        "zone": "Buberuka Highlands",
+        "altitude_range": "1800-2500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Wheat",
+          "Sorghum"
+        ],
+        "zone": "Buberuka Highlands",
+        "altitude_range": "1800-2500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Buberuka Highlands",
+        "altitude_range": "1800-2500m"
+      }
+    },
+    "Gakenke": {
+      "Season_A": {
+        "crops": [
+          "Beans",
+          "Irish Potato",
+          "Sorghum",
+          "Maize",
+          "Banana"
+        ],
+        "zone": "Congo-Nile Divide / Northern Highlands",
+        "altitude_range": "1600-2200m"
+      },
+      "Season_B": {
+        "crops": [
+          "Beans",
+          "Irish Potato",
+          "Sorghum",
+          "Banana"
+        ],
+        "zone": "Congo-Nile Divide / Northern Highlands",
+        "altitude_range": "1600-2200m"
+      },
+      "Season_C": {
+        "crops": [
+          "Vegetables",
+          "Irish Potato",
+          "Sweet Potato"
+        ],
+        "zone": "Congo-Nile Divide / Northern Highlands",
+        "altitude_range": "1600-2200m"
+      }
+    },
+    "Gicumbi": {
+      "Season_A": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Wheat",
+          "Maize",
+          "Sorghum"
+        ],
+        "zone": "Buberuka Highlands",
+        "altitude_range": "1800-2400m"
+      },
+      "Season_B": {
+        "crops": [
+          "Irish Potato",
+          "Wheat",
+          "Beans",
+          "Sorghum"
+        ],
+        "zone": "Buberuka Highlands",
+        "altitude_range": "1800-2400m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Buberuka Highlands",
+        "altitude_range": "1800-2400m"
+      }
+    },
+    "Musanze": {
+      "Season_A": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Maize",
+          "Banana",
+          "Wheat"
+        ],
+        "zone": "Volcanic / Northern Highlands",
+        "altitude_range": "1800-2500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Banana",
+          "Wheat"
+        ],
+        "zone": "Volcanic / Northern Highlands",
+        "altitude_range": "1800-2500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Beans",
+          "Banana"
+        ],
+        "zone": "Volcanic / Northern Highlands",
+        "altitude_range": "1800-2500m"
+      }
+    },
+    "Rulindo": {
+      "Season_A": {
+        "crops": [
+          "Beans",
+          "Banana",
+          "Maize",
+          "Irish Potato",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Northern",
+        "altitude_range": "1600-2000m"
+      },
+      "Season_B": {
+        "crops": [
+          "Beans",
+          "Banana",
+          "Maize",
+          "Sorghum"
+        ],
+        "zone": "Central Plateau / Northern",
+        "altitude_range": "1600-2000m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Central Plateau / Northern",
+        "altitude_range": "1600-2000m"
+      }
+    },
+    "Gisagara": {
+      "Season_A": {
+        "crops": [
+          "Beans",
+          "Banana",
+          "Cassava",
+          "Sorghum",
+          "Sweet Potato"
+        ],
+        "zone": "Central Plateau / Southern",
+        "altitude_range": "1400-1900m"
+      },
+      "Season_B": {
+        "crops": [
+          "Beans",
+          "Sorghum",
+          "Banana",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Southern",
+        "altitude_range": "1400-1900m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Central Plateau / Southern",
+        "altitude_range": "1400-1900m"
+      }
+    },
+    "Huye": {
+      "Season_A": {
+        "crops": [
+          "Beans",
+          "Banana",
+          "Maize",
+          "Sorghum",
+          "Irish Potato"
+        ],
+        "zone": "Central Plateau / Southern Highlands",
+        "altitude_range": "1500-2000m"
+      },
+      "Season_B": {
+        "crops": [
+          "Beans",
+          "Banana",
+          "Sorghum",
+          "Irish Potato"
+        ],
+        "zone": "Central Plateau / Southern Highlands",
+        "altitude_range": "1500-2000m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Sweet Potato"
+        ],
+        "zone": "Central Plateau / Southern Highlands",
+        "altitude_range": "1500-2000m"
+      }
+    },
+    "Kamonyi": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Beans",
+          "Cassava",
+          "Maize",
+          "Sweet Potato"
+        ],
+        "zone": "Central Plateau",
+        "altitude_range": "1400-1800m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Beans",
+          "Cassava",
+          "Sorghum"
+        ],
+        "zone": "Central Plateau",
+        "altitude_range": "1400-1800m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Central Plateau",
+        "altitude_range": "1400-1800m"
+      }
+    },
+    "Muhanga": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Beans",
+          "Maize",
+          "Cassava",
+          "Irish Potato"
+        ],
+        "zone": "Central Plateau / Congo-Nile Divide",
+        "altitude_range": "1500-2000m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Beans",
+          "Maize",
+          "Irish Potato"
+        ],
+        "zone": "Central Plateau / Congo-Nile Divide",
+        "altitude_range": "1500-2000m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Sweet Potato"
+        ],
+        "zone": "Central Plateau / Congo-Nile Divide",
+        "altitude_range": "1500-2000m"
+      }
+    },
+    "Nyamagabe": {
+      "Season_A": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Wheat",
+          "Maize",
+          "Sorghum"
+        ],
+        "zone": "Congo-Nile Divide / Southern Highlands",
+        "altitude_range": "1700-2500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Irish Potato",
+          "Wheat",
+          "Beans",
+          "Sorghum"
+        ],
+        "zone": "Congo-Nile Divide / Southern Highlands",
+        "altitude_range": "1700-2500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Congo-Nile Divide / Southern Highlands",
+        "altitude_range": "1700-2500m"
+      }
+    },
+    "Nyanza": {
+      "Season_A": {
+        "crops": [
+          "Beans",
+          "Banana",
+          "Cassava",
+          "Sorghum",
+          "Maize"
+        ],
+        "zone": "Central Plateau / Southern",
+        "altitude_range": "1400-1800m"
+      },
+      "Season_B": {
+        "crops": [
+          "Beans",
+          "Sorghum",
+          "Banana",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Southern",
+        "altitude_range": "1400-1800m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Central Plateau / Southern",
+        "altitude_range": "1400-1800m"
+      }
+    },
+    "Nyaruguru": {
+      "Season_A": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Wheat",
+          "Sorghum",
+          "Maize"
+        ],
+        "zone": "Congo-Nile Divide / Southern Highlands",
+        "altitude_range": "1700-2600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Irish Potato",
+          "Wheat",
+          "Beans",
+          "Sorghum"
+        ],
+        "zone": "Congo-Nile Divide / Southern Highlands",
+        "altitude_range": "1700-2600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Congo-Nile Divide / Southern Highlands",
+        "altitude_range": "1700-2600m"
+      }
+    },
+    "Ruhango": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Beans",
+          "Cassava",
+          "Maize",
+          "Sweet Potato"
+        ],
+        "zone": "Central Plateau",
+        "altitude_range": "1400-1800m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Sorghum"
+        ],
+        "zone": "Central Plateau",
+        "altitude_range": "1400-1800m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Central Plateau",
+        "altitude_range": "1400-1800m"
+      }
+    },
+    "Karongi": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Maize",
+          "Sweet Potato"
+        ],
+        "zone": "Congo-Nile Divide / Lake Kivu",
+        "altitude_range": "1500-2200m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Maize"
+        ],
+        "zone": "Congo-Nile Divide / Lake Kivu",
+        "altitude_range": "1500-2200m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Banana"
+        ],
+        "zone": "Congo-Nile Divide / Lake Kivu",
+        "altitude_range": "1500-2200m"
+      }
+    },
+    "Ngororero": {
+      "Season_A": {
+        "crops": [
+          "Beans",
+          "Cassava",
+          "Banana",
+          "Sorghum",
+          "Maize"
+        ],
+        "zone": "Congo-Nile Divide",
+        "altitude_range": "1600-2200m"
+      },
+      "Season_B": {
+        "crops": [
+          "Beans",
+          "Sorghum",
+          "Cassava",
+          "Banana"
+        ],
+        "zone": "Congo-Nile Divide",
+        "altitude_range": "1600-2200m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Beans"
+        ],
+        "zone": "Congo-Nile Divide",
+        "altitude_range": "1600-2200m"
+      }
+    },
+    "Nyabihu": {
+      "Season_A": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Banana",
+          "Wheat",
+          "Maize"
+        ],
+        "zone": "Volcanic / Congo-Nile Divide",
+        "altitude_range": "1700-2500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Irish Potato",
+          "Beans",
+          "Banana",
+          "Wheat"
+        ],
+        "zone": "Volcanic / Congo-Nile Divide",
+        "altitude_range": "1700-2500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Irish Potato",
+          "Vegetables",
+          "Banana"
+        ],
+        "zone": "Volcanic / Congo-Nile Divide",
+        "altitude_range": "1700-2500m"
+      }
+    },
+    "Nyamasheke": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Maize",
+          "Coffee"
+        ],
+        "zone": "Congo-Nile Divide / Lake Kivu",
+        "altitude_range": "1400-2000m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Coffee",
+          "Beans"
+        ],
+        "zone": "Congo-Nile Divide / Lake Kivu",
+        "altitude_range": "1400-2000m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Banana"
+        ],
+        "zone": "Congo-Nile Divide / Lake Kivu",
+        "altitude_range": "1400-2000m"
+      }
+    },
+    "Rubavu": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Maize",
+          "Sweet Potato"
+        ],
+        "zone": "Lake Kivu Shore / Volcanic",
+        "altitude_range": "1500-2100m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Maize"
+        ],
+        "zone": "Lake Kivu Shore / Volcanic",
+        "altitude_range": "1500-2100m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Banana"
+        ],
+        "zone": "Lake Kivu Shore / Volcanic",
+        "altitude_range": "1500-2100m"
+      }
+    },
+    "Rutsiro": {
+      "Season_A": {
+        "crops": [
+          "Cassava",
+          "Banana",
+          "Beans",
+          "Sorghum",
+          "Maize"
+        ],
+        "zone": "Congo-Nile Divide / Western",
+        "altitude_range": "1400-2000m"
+      },
+      "Season_B": {
+        "crops": [
+          "Cassava",
+          "Banana",
+          "Sorghum",
+          "Beans"
+        ],
+        "zone": "Congo-Nile Divide / Western",
+        "altitude_range": "1400-2000m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Cassava"
+        ],
+        "zone": "Congo-Nile Divide / Western",
+        "altitude_range": "1400-2000m"
+      }
+    },
+    "Rusizi": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Cassava",
+          "Rice",
+          "Maize",
+          "Beans"
+        ],
+        "zone": "Imbo Plain / Lake Kivu",
+        "altitude_range": "1000-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Rice",
+          "Cassava",
+          "Maize"
+        ],
+        "zone": "Imbo Plain / Lake Kivu",
+        "altitude_range": "1000-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Rice",
+          "Sweet Potato",
+          "Vegetables"
+        ],
+        "zone": "Imbo Plain / Lake Kivu",
+        "altitude_range": "1000-1600m"
+      }
+    },
+    "Bugesera": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Beans",
+          "Sorghum",
+          "Sweet Potato"
+        ],
+        "zone": "Mayaga / Bugesera Lowlands",
+        "altitude_range": "1200-1500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Sorghum",
+          "Beans"
+        ],
+        "zone": "Mayaga / Bugesera Lowlands",
+        "altitude_range": "1200-1500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Cassava"
+        ],
+        "zone": "Mayaga / Bugesera Lowlands",
+        "altitude_range": "1200-1500m"
+      }
+    },
+    "Gatsibo": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Sorghum",
+          "Beans",
+          "Sweet Potato"
+        ],
+        "zone": "Umutara / Eastern Plateau",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Sorghum",
+          "Cassava",
+          "Beans"
+        ],
+        "zone": "Umutara / Eastern Plateau",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Cassava",
+          "Vegetables"
+        ],
+        "zone": "Umutara / Eastern Plateau",
+        "altitude_range": "1300-1600m"
+      }
+    },
+    "Kayonza": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Sorghum",
+          "Beans",
+          "Sweet Potato"
+        ],
+        "zone": "Umutara / Eastern Lowlands",
+        "altitude_range": "1200-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Sorghum",
+          "Beans"
+        ],
+        "zone": "Umutara / Eastern Lowlands",
+        "altitude_range": "1200-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Cassava",
+          "Vegetables"
+        ],
+        "zone": "Umutara / Eastern Lowlands",
+        "altitude_range": "1200-1600m"
+      }
+    },
+    "Kirehe": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Rice",
+          "Sorghum",
+          "Beans"
+        ],
+        "zone": "Umutara / Eastern Lowlands",
+        "altitude_range": "1100-1500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Rice",
+          "Cassava",
+          "Sorghum"
+        ],
+        "zone": "Umutara / Eastern Lowlands",
+        "altitude_range": "1100-1500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Rice",
+          "Sweet Potato",
+          "Vegetables"
+        ],
+        "zone": "Umutara / Eastern Lowlands",
+        "altitude_range": "1100-1500m"
+      }
+    },
+    "Ngoma": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Beans",
+          "Sorghum",
+          "Sweet Potato"
+        ],
+        "zone": "Mayaga / Eastern Plateau",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Cassava",
+          "Sorghum",
+          "Beans"
+        ],
+        "zone": "Mayaga / Eastern Plateau",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Cassava",
+          "Vegetables"
+        ],
+        "zone": "Mayaga / Eastern Plateau",
+        "altitude_range": "1300-1600m"
+      }
+    },
+    "Nyagatare": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Sorghum",
+          "Cassava",
+          "Beans",
+          "Sunflower"
+        ],
+        "zone": "Umutara / Semi-Arid Savanna",
+        "altitude_range": "1000-1500m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Sorghum",
+          "Cassava",
+          "Sunflower"
+        ],
+        "zone": "Umutara / Semi-Arid Savanna",
+        "altitude_range": "1000-1500m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Cassava",
+          "Vegetables"
+        ],
+        "zone": "Umutara / Semi-Arid Savanna",
+        "altitude_range": "1000-1500m"
+      }
+    },
+    "Rwamagana": {
+      "Season_A": {
+        "crops": [
+          "Maize",
+          "Banana",
+          "Cassava",
+          "Beans",
+          "Sweet Potato"
+        ],
+        "zone": "Central Plateau / Eastern",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Maize",
+          "Banana",
+          "Cassava",
+          "Beans"
+        ],
+        "zone": "Central Plateau / Eastern",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Sweet Potato",
+          "Vegetables",
+          "Banana"
+        ],
+        "zone": "Central Plateau / Eastern",
+        "altitude_range": "1300-1600m"
+      }
+    },
+    "Gasabo": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Maize",
+          "Beans",
+          "Sweet Potato",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Maize",
+          "Beans",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Vegetables",
+          "Sweet Potato",
+          "Banana"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      }
+    },
+    "Kicukiro": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Maize",
+          "Beans",
+          "Sweet Potato",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Maize",
+          "Beans",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Vegetables",
+          "Sweet Potato",
+          "Banana"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      }
+    },
+    "Nyarugenge": {
+      "Season_A": {
+        "crops": [
+          "Banana",
+          "Maize",
+          "Beans",
+          "Sweet Potato",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_B": {
+        "crops": [
+          "Banana",
+          "Maize",
+          "Beans",
+          "Cassava"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      },
+      "Season_C": {
+        "crops": [
+          "Vegetables",
+          "Sweet Potato",
+          "Banana"
+        ],
+        "zone": "Central Plateau / Peri-Urban",
+        "altitude_range": "1300-1600m"
+      }
+    }
+  }
+}

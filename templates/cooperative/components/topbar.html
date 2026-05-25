@@ -1,0 +1,19 @@
+<header class="topbar">
+    <div class="breadcrumb">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span class="sep">›</span>
+      <span class="current">Admin</span>
+    </div>
+
+    <div class="topbar-actions">
+      <!-- <button class="icon-btn" title="Notifications">
+        <div class="notif-dot"></div>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 2a6 6 0 016 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 016-6z"/><path d="M8.5 17a1.5 1.5 0 003 0"/></svg>
+      </button> -->
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
+      <div class="user-btn">
+        <div class="avatar">{{ cooperative_name[:2] if cooperative_name else 'CO' }}</div>
+        {{ cooperative_name if cooperative_name else 'Cooperative' }} ▾
+      </div>
+    </div>
+  </header>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DigitalAgri — Prediction Results</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --green-900:#0D3320;--green-800:#14472D;--green-700:#1A5C3A;
+  --green-600:#1E7045;--green-500:#22884F;--green-400:#2BA563;
+  --green-300:#4FBF80;--green-200:#A8DFBF;--green-100:#D4EFE0;--green-50:#EEF8F3;
+
+  --sidebar-bg:#14472D;--sidebar-hover:rgba(255,255,255,0.09);
+  --sidebar-active:rgba(255,255,255,0.16);--sidebar-text:rgba(255,255,255,0.72);
+  --sidebar-text-active:#fff;
+
+  --topbar-bg:#fff;--topbar-border:#E8EDF0;
+  --bg:#F0F5F2;--surface:#fff;--surface-2:#F7FAF8;--surface-3:#EFF6F2;
+  --border:#E4EBE7;--border-2:#D0DDD6;
+  --text-primary:#0F2419;--text-secondary:#4A6355;--text-muted:#8BA898;
+
+  --blue:#3B82F6;--blue-light:#EFF6FF;
+  --amber:#F59E0B;--amber-light:#FFFBEB;
+  --rose:#F43F5E;--rose-light:#FFF1F2;
+  --violet:#8B5CF6;--violet-light:#F5F3FF;
+  --teal:#14B8A6;--teal-light:#F0FDFA;
+  --cyan:#06B6D4;--cyan-light:#ECFEFF;
+  --gold:#D4A017;--gold-light:#FEF9E7;
+
+  --shadow-sm:0 1px 3px rgba(15,36,25,0.06),0 1px 2px rgba(15,36,25,0.04);
+  --shadow:0 4px 12px rgba(15,36,25,0.08),0 2px 4px rgba(15,36,25,0.04);
+  --shadow-md:0 8px 24px rgba(15,36,25,0.1),0 4px 8px rgba(15,36,25,0.05);
+  --shadow-lg:0 20px 48px rgba(15,36,25,0.12),0 8px 16px rgba(15,36,25,0.06);
+  --glow-green:0 0 20px rgba(43,165,99,0.25);
+
+  --radius:12px;--radius-lg:16px;--radius-xl:20px;
+  --sidebar-w:248px;--topbar-h:64px;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --font-display:'Lora',Georgia,serif;
+  --transition:0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="dark"]{
+  --sidebar-bg:#0A2118;--sidebar-hover:rgba(255,255,255,0.07);
+  --sidebar-active:rgba(75,191,128,0.18);--sidebar-text:rgba(255,255,255,0.58);
+  --sidebar-text-active:#fff;
+  --topbar-bg:#0F1E16;--topbar-border:#1C3327;
+  --bg:#0C1A11;--surface:#112019;--surface-2:#162A1E;--surface-3:#0E2517;
+  --border:#1E3528;--border-2:#264538;
+  --text-primary:#E8F5EE;--text-secondary:#7BAF94;--text-muted:#4A7060;
+  --blue-light:#172554;--amber-light:#1C1400;--rose-light:#1F0A10;
+  --violet-light:#1B1030;--teal-light:#042F2E;--cyan-light:#083344;
+  --gold-light:#1A1200;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.3);--shadow:0 4px 12px rgba(0,0,0,0.35);
+  --shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);
+  --glow-green:0 0 24px rgba(43,165,99,0.15);
+}
+
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text-primary);transition:background var(--transition),color var(--transition)}
+
+/* ── APP SHELL ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ══════════════════════════════════════════
+   SIDEBAR — DO NOT TOUCH
+══════════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-bg);
+  display:flex;flex-direction:column;z-index:20;position:relative;overflow:hidden;
+  transition:background var(--transition);
+}
+.sidebar::before{content:'';position:absolute;top:-80px;right:-60px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(75,191,128,0.1) 0%,transparent 70%);pointer-events:none}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px 18px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.07)}
+.logo-mark{width:34px;height:34px;background:var(--green-400);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-name{font-family:var(--font-display);font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.2px}
+.logo-name span{color:var(--green-300)}
+.admin-badge{font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  background:rgba(245,158,11,0.25);color:#FCD34D;padding:2px 7px;border-radius:20px;margin-left:auto}
+.sidebar-nav{flex:1;overflow-y:auto;padding:6px 10px 8px}
+.sidebar-nav::-webkit-scrollbar{width:0}
+.section-label{font-size:10px;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.35);
+  text-transform:uppercase;padding:14px 8px 5px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;
+  cursor:pointer;transition:all var(--transition);color:var(--sidebar-text);
+  font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--sidebar-hover);color:var(--sidebar-text-active)}
+.nav-item.active{background:var(--sidebar-active);color:var(--sidebar-text-active)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:60%;background:var(--green-300);border-radius:0 3px 3px 0}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.8}
+.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:rgba(244,63,94,0.25);color:#FDA4AF;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.nav-badge.green{background:rgba(75,191,128,0.2);color:var(--green-200)}
+.sidebar-bottom{margin-top:auto;padding:10px;border-top:1px solid rgba(255,255,255,0.07)}
+.nav-item.logout{color:rgba(255,120,120,0.7)}
+.nav-item.logout:hover{background:rgba(244,63,94,0.1);color:#ff7b7b}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ══════════════════════════════════════════
+   TOPBAR — DO NOT TOUCH
+══════════════════════════════════════════ */
+.topbar{height:var(--topbar-h);background:var(--topbar-bg);border-bottom:1px solid var(--topbar-border);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;z-index:10;
+  transition:background var(--transition),border-color var(--transition)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);flex:1}
+.breadcrumb a{color:var(--text-muted);text-decoration:none;transition:color var(--transition)}
+.breadcrumb a:hover{color:var(--green-500)}
+.breadcrumb .sep{font-size:11px}
+.breadcrumb .current{color:var(--text-primary);font-weight:700}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--surface-2);
+  border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:36px;
+  transition:all var(--transition);width:220px}
+.search-bar:focus-within{border-color:var(--green-400);background:var(--surface);
+  box-shadow:0 0 0 3px rgba(43,165,99,0.1);width:260px}
+.search-bar input{border:none;background:transparent;font-family:var(--font);font-size:13px;
+  color:var(--text-primary);outline:none;flex:1;min-width:0}
+.search-bar input::placeholder{color:var(--text-muted)}
+.search-icon{color:var(--text-muted);flex-shrink:0}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all var(--transition);position:relative}
+.icon-btn:hover{border-color:var(--green-400);color:var(--green-500);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;
+  background:var(--rose);border-radius:50%;border:2px solid var(--topbar-bg)}
+.theme-toggle{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all var(--transition);font-size:15px;font-family:var(--font)}
+.theme-toggle:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-1px)}
+.user-btn{display:flex;align-items:center;gap:9px;padding:0 12px 0 6px;height:38px;
+  border-radius:10px;border:1.5px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all var(--transition);font-size:13px;font-weight:600;color:var(--text-primary)}
+.user-btn:hover{border-color:var(--green-400);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.avatar{width:26px;height:26px;border-radius:7px;
+  background:linear-gradient(135deg,var(--amber),#D97706);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+/* ══════════════════════════════════════════
+   CONTENT AREA
+══════════════════════════════════════════ */
+.content{flex:1;overflow-y:auto;padding:24px 24px 48px;background:var(--bg)}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+
+/* ══ ANIMATIONS ══ */
+@keyframes slideDown   { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideUp     { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+@keyframes slideLeft   { from{opacity:0;transform:translateX(20px)}  to{opacity:1;transform:translateX(0)} }
+@keyframes scaleIn     { from{opacity:0;transform:scale(0.94)}       to{opacity:1;transform:scale(1)} }
+@keyframes fadeIn      { from{opacity:0}                             to{opacity:1} }
+@keyframes shimmer     { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+@keyframes progressFill{ from{width:0%} to{width:var(--target-w)} }
+@keyframes barGrow     { from{width:0%} to{width:var(--bar-w)} }
+@keyframes ringFill    { from{stroke-dashoffset:var(--full)} to{stroke-dashoffset:var(--offset)} }
+@keyframes floatBadge  { from{opacity:0;transform:translateX(-50%) translateY(-6px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+@keyframes pulse       { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+@keyframes glow        { 0%,100%{box-shadow:var(--glow-green)} 50%{box-shadow:0 0 32px rgba(43,165,99,0.4)} }
+@keyframes leafSway    { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+@keyframes numberUp    { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes dotBlink    { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ══ PAGE HEADER ══ */
+.page-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+  animation:slideDown 0.4s ease-out both;
+}
+.page-header-left h1{
+  font-family:var(--font-display);font-size:22px;font-weight:600;
+  color:var(--text-primary);line-height:1.2;
+}
+.page-header-left p{font-size:13px;color:var(--text-muted);margin-top:3px}
+.page-header-right{display:flex;gap:8px}
+
+/* ══ STATUS RIBBON ══ */
+.status-ribbon{
+  background:linear-gradient(135deg,var(--green-700) 0%,var(--green-500) 60%,var(--green-400) 100%);
+  border-radius:var(--radius-lg);padding:16px 22px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;position:relative;overflow:hidden;
+  animation:slideDown 0.45s ease-out 0.05s both;
+  box-shadow:var(--shadow-md),var(--glow-green);
+}
+.status-ribbon::before{
+  content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;
+  border-radius:50%;background:rgba(255,255,255,0.06);
+}
+.status-ribbon::after{
+  content:'';position:absolute;bottom:-50px;left:30%;width:200px;height:200px;
+  border-radius:50%;background:rgba(255,255,255,0.04);
+}
+.ribbon-farmer{display:flex;align-items:center;gap:14px;z-index:1}
+.ribbon-avatar{
+  width:46px;height:46px;border-radius:12px;
+  background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:16px;font-weight:600;color:#fff;
+  backdrop-filter:blur(4px);
+}
+.ribbon-name{font-size:17px;font-weight:700;color:#fff;line-height:1.2}
+.ribbon-sub{font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;display:flex;align-items:center;gap:5px}
+.ribbon-sub svg{width:11px;height:11px}
+.ribbon-pills{display:flex;gap:8px;flex-wrap:wrap;z-index:1}
+.ribbon-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 11px;border-radius:20px;
+  font-size:11.5px;font-weight:500;
+  background:rgba(255,255,255,0.15);color:#fff;
+  border:1px solid rgba(255,255,255,0.2);
+  backdrop-filter:blur(4px);
+  transition:background 0.2s;
+}
+.ribbon-pill:hover{background:rgba(255,255,255,0.25)}
+.ribbon-pill svg{width:12px;height:12px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;
+  animation:dotBlink 2s ease-in-out infinite;flex-shrink:0}
+
+/* ══ MAIN GRID ══ */
+.main-grid{
+  display:grid;
+  grid-template-columns:300px minmax(0,1.1fr);
+  gap:18px;
+  margin-bottom:18px;
+  animation:fadeIn 0.5s ease-out 0.2s both;
+}
+
+/* ══ LEFT — FARMER PROFILE ══ */
+.farmer-panel{
+  background:var(--surface);border-radius:var(--radius-xl);
+  box-shadow:var(--shadow);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.farmer-panel-hero{
+  background:linear-gradient(160deg,var(--green-800) 0%,var(--green-600) 100%);
+  padding:22px 20px 60px;position:relative;text-align:center;overflow:hidden;
+}
+.farmer-panel-hero::before{
+  content:'🌿';position:absolute;top:10px;right:14px;font-size:40px;opacity:0.15;
+  animation:leafSway 4s ease-in-out infinite;transform-origin:bottom center;
+}
+.farmer-panel-hero::after{
+  content:'';position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
+  width:120px;height:120px;border-radius:50%;
+  background:var(--surface);
+}
+.fp-avatar{
+  width:68px;height:68px;border-radius:16px;margin:0 auto 10px;
+  background:rgba(255,255,255,0.2);border:3px solid rgba(255,255,255,0.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:24px;font-weight:600;color:#fff;
+  position:relative;z-index:1;
+}
+.fp-name{font-size:17px;font-weight:700;color:#fff;position:relative;z-index:1}
+.fp-cooperative{font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px;position:relative;z-index:1}
+
+.farmer-panel-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:16px}
+
+/* Profile stat row */
+.fp-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.fp-stat{
+  text-align:center;padding:10px 6px;border-radius:10px;
+  background:var(--surface-3);border:1px solid var(--border);
+  transition:all 0.2s;
+}
+.fp-stat:hover{border-color:var(--green-300);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.fp-stat-value{font-size:16px;font-weight:700;color:var(--green-500)}
+.fp-stat-label{font-size:10px;color:var(--text-muted);margin-top:2px;font-weight:500}
+
+/* Section heading */
+.fp-section-title{
+  font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.fp-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Soil gauges */
+.soil-gauges{display:flex;flex-direction:column;gap:10px}
+.soil-gauge-row{display:flex;align-items:center;gap:10px}
+.soil-gauge-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.soil-gauge-info{flex:1;min-width:0}
+.soil-gauge-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.soil-gauge-name{font-size:12px;font-weight:500;color:var(--text-secondary)}
+.soil-gauge-val{font-size:12px;font-weight:700;color:var(--text-primary)}
+.soil-gauge-track{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.soil-gauge-fill{height:100%;border-radius:3px;animation:progressFill 1.4s cubic-bezier(0.4,0,0.2,1) forwards;width:0}
+
+/* Climate chips */
+.climate-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.climate-chip{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;
+  background:var(--surface-3);border-radius:10px;border:1px solid var(--border);
+  transition:all 0.2s;
+}
+.climate-chip:hover{border-color:var(--green-200);transform:translateY(-1px)}
+.climate-chip-icon{font-size:18px;flex-shrink:0}
+.climate-chip-label{font-size:10px;color:var(--text-muted);font-weight:500}
+.climate-chip-value{font-size:13px;font-weight:700;color:var(--text-primary)}
+
+/* ══ RIGHT PANEL ══ */
+.right-panel{display:flex;flex-direction:column;gap:18px}
+
+/* Advice hero */
+.advice-hero{
+  width:100%;max-width:100%;
+  background:var(--surface);border-radius:var(--radius-xl);
+  box-shadow:var(--shadow);overflow:hidden;
+  border:1.5px solid var(--green-100);
+  animation:slideLeft 0.45s ease-out 0.25s both;
+}
+[data-theme="dark"] .advice-hero{border-color:rgba(43,165,99,0.2)}
+.advice-hero-header{
+  background:linear-gradient(135deg,var(--green-50) 0%,#fff 100%);
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+[data-theme="dark"] .advice-hero-header{background:var(--surface-2)}
+.advice-crop-badge{
+  width:48px;height:48px;border-radius:12px;
+  background:linear-gradient(135deg,var(--green-400),var(--green-600));
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 4px 12px rgba(43,165,99,0.3);flex-shrink:0;
+}
+.advice-hero-text{}
+.advice-hero-label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--green-500)}
+.advice-hero-title{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-top:1px;font-style:italic}
+.advice-hero-body{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.advice-block-item{
+  background:var(--surface-3);border-radius:12px;padding:13px 15px;
+  border:1px solid var(--border);transition:all 0.2s;
+}
+.advice-block-item:hover{border-color:var(--green-200);box-shadow:var(--shadow-sm)}
+.abi-icon{font-size:20px;margin-bottom:6px}
+.abi-title{font-size:11px;font-weight:700;color:var(--green-600);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.abi-text{font-size:12px;color:var(--text-secondary);line-height:1.55}
+
+/* Planting calendar */
+.planting-calendar{padding:0 20px 16px}
+.pc-label{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.month-chips{display:flex;gap:5px}
+.month-chip{
+  flex:1;text-align:center;padding:6px 2px;border-radius:7px;
+  font-size:10.5px;font-weight:600;cursor:default;
+  transition:all 0.2s;
+  animation:scaleIn 0.3s ease-out both;
+}
+.month-chip.inactive{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}
+.month-chip.active{
+  background:linear-gradient(135deg,var(--green-400),var(--green-500));
+  color:#fff;border:1px solid var(--green-400);
+  box-shadow:0 2px 6px rgba(43,165,99,0.3);
+}
+.month-chip.active:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(43,165,99,0.35)}
+
+/* ══ TOP 3 CARDS ══ */
+.top3-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  animation:slideUp 0.45s ease-out 0.3s both;
+}
+.pred-card{
+  background:var(--surface);border-radius:var(--radius-xl);
+  padding:12px 12px;text-align:center;
+  box-shadow:var(--shadow-sm);
+  border:1.5px solid var(--border);
+  position:relative;overflow:hidden;
+  transition:all 0.28s cubic-bezier(0.4,0,0.2,1);
+  display:flex;flex-direction:column;align-items:center;
+  min-height:auto;
+}
+.pred-card::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:var(--card-accent);border-radius:0 0 var(--radius-xl) var(--radius-xl);
+}
+.pred-card.rank-1{
+  --card-accent:linear-gradient(90deg,var(--green-400),var(--green-300));
+  border-color:var(--green-300);
+  animation:glow 3s ease-in-out 1.5s infinite;
+}
+.pred-card.rank-2{--card-accent:linear-gradient(90deg,var(--green-300),var(--green-200))}
+.pred-card.rank-3{--card-accent:linear-gradient(90deg,var(--border-2),var(--border))}
+.pred-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md)}
+.pred-card.rank-1:hover{box-shadow:var(--shadow-md),var(--glow-green)}
+
+.best-badge{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(90deg,var(--green-500),var(--green-400));
+  color:#fff;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  padding:3px 12px;border-radius:0 0 10px 10px;
+  animation:floatBadge 0.4s ease-out 0.6s both;opacity:0;
+  white-space:nowrap;
+}
+.rank-crown{font-size:12px;margin-bottom:4px;color:var(--gold)}
+.crop-emoji-big{font-size:38px;margin-bottom:6px;line-height:1;animation:pulse 4s ease-in-out 2s infinite}
+.crop-name-big{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:10px;line-height:1.2}
+
+/* Ring chart */
+.ring-wrap{position:relative;width:70px;height:70px;margin:6px auto 8px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:7}
+.ring-fg{fill:none;stroke-width:7;stroke-linecap:round;
+  stroke-dasharray:var(--circ);stroke-dashoffset:var(--full);
+  animation:ringFill 1.4s cubic-bezier(0.4,0,0.2,1) forwards;}
+.ring-fg.rank-1{stroke:var(--green-400)}
+.ring-fg.rank-2{stroke:var(--green-300)}
+.ring-fg.rank-3{stroke:var(--text-muted)}
+.ring-label{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:16px;font-weight:800;line-height:1;text-align:center;
+}
+.ring-label.rank-1{color:var(--green-500)}
+.ring-label.rank-2{color:var(--green-400)}
+.ring-label.rank-3{color:var(--text-muted)}
+.ring-sub{font-size:8px;display:block;font-weight:500;color:var(--text-muted);margin-top:1px}
+.rank-label-text{font-size:11px;color:var(--text-muted);font-weight:500;margin-top:2px}
+
+/* ══ BOTTOM GRID: chart + full advice ══ */
+.bottom-grid{
+  display:grid;grid-template-columns:1fr 380px;gap:18px;margin-bottom:18px;
+  animation:fadeIn 0.5s ease-out 0.45s both;
+}
+
+/* ── CHART CARD ── */
+.chart-card{
+  background:var(--surface);border-radius:var(--radius-xl);
+  padding:22px;box-shadow:var(--shadow);
+}
+.chart-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.chart-card-title{font-size:15px;font-weight:700;color:var(--text-primary)}
+.chart-card-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.chart-score-tag{
+  background:var(--green-50);color:var(--green-600);
+  border:1px solid var(--green-200);border-radius:20px;
+  font-size:11px;font-weight:600;padding:3px 10px;
+}
+[data-theme="dark"] .chart-score-tag{background:rgba(43,165,99,0.1);border-color:rgba(43,165,99,0.2);color:var(--green-300)}
+
+.chart-rows{display:flex;flex-direction:column;gap:10px}
+.chart-row{display:flex;align-items:center;gap:12px;opacity:0;animation:slideUp 0.4s ease-out forwards}
+.chart-row-rank{width:18px;text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);flex-shrink:0}
+.chart-row-label{width:110px;font-size:12px;color:var(--text-secondary);text-align:right;flex-shrink:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.chart-row-track{flex:1;height:28px;background:var(--surface-2);border-radius:6px;overflow:hidden;position:relative;cursor:pointer}
+.chart-row-bar{
+  height:100%;border-radius:6px;width:0;
+  animation:barGrow 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+  position:relative;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+}
+.chart-row-bar:hover{filter:brightness(1.1)}
+.chart-row-bar-val{
+  font-size:11px;font-weight:700;color:#fff;opacity:0;
+  transition:opacity 0.2s;white-space:nowrap;
+}
+.chart-row-track:hover .chart-row-bar-val{opacity:1}
+.chart-row-bar.top1{background:linear-gradient(90deg,var(--green-500),var(--green-400))}
+.chart-row-bar.top2{background:linear-gradient(90deg,var(--green-400),var(--green-300))}
+.chart-row-bar.top3{background:linear-gradient(90deg,var(--green-300),var(--green-200))}
+.chart-row-bar.other{background:var(--border)}
+.chart-legend-row{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.legend-chip{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary)}
+.legend-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* ── RIGHT ADVICE DETAIL ── */
+.detail-card{
+  background:var(--surface);border-radius:var(--radius-xl);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.detail-card-header{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface-3);
+}
+.detail-card-title{font-size:13px;font-weight:700;color:var(--text-primary)}
+.detail-card-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.detail-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.detail-input-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 10px;border-radius:8px;background:var(--surface-2);
+  border:1px solid var(--border);transition:all 0.2s;
+}
+.detail-input-item:hover{border-color:var(--green-200);background:var(--green-50)}
+[data-theme="dark"] .detail-input-item:hover{background:rgba(43,165,99,0.08);border-color:rgba(43,165,99,0.2)}
+.dii-label{font-size:11px;color:var(--text-muted);font-weight:500}
+.dii-val{font-size:12px;font-weight:700;color:var(--text-primary)}
+
+/* ══ ACTION BAR ══ */
+.action-bar{
+  display:flex;gap:10px;align-items:center;
+  animation:slideUp 0.4s ease-out 0.6s both;
+  padding:4px 0;
+}
+.btn-action{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+  border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all 0.22s ease;text-decoration:none;border:none;
+}
+.btn-action svg{width:16px;height:16px;flex-shrink:0}
+.btn-primary{
+  background:linear-gradient(135deg,var(--green-500),var(--green-400));
+  color:#fff;box-shadow:0 3px 10px rgba(43,165,99,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(43,165,99,0.4)}
+.btn-outline-green{
+  background:transparent;color:var(--green-500);
+  border:1.5px solid var(--green-400);
+}
+.btn-outline-green:hover{background:var(--green-50);transform:translateY(-1px)}
+[data-theme="dark"] .btn-outline-green:hover{background:rgba(43,165,99,0.1)}
+.btn-outline-gray{
+  background:transparent;color:var(--text-secondary);
+  border:1.5px solid var(--border);
+}
+.btn-outline-gray:hover{background:var(--surface-2);transform:translateY(-1px)}
+.btn-spacer{flex:1}
+.btn-share{
+  background:var(--violet-light);color:var(--violet);
+  border:1.5px solid rgba(139,92,246,0.25);
+}
+.btn-share:hover{background:rgba(139,92,246,0.15);transform:translateY(-1px)}
+
+/* ══ CONFIDENCE METER STRIP ══ */
+.confidence-strip{
+  background:var(--surface);border-radius:var(--radius-xl);
+  padding:18px 22px;box-shadow:var(--shadow);margin-bottom:18px;
+  display:flex;gap:18px;align-items:stretch;
+  animation:slideDown 0.4s ease-out 0.15s both;
+}
+.cs-divider{width:1px;background:var(--border);flex-shrink:0;border-radius:1px}
+.cs-item{flex:1;text-align:center;padding:0 12px}
+.cs-item:first-child{text-align:left;padding-left:0}
+.cs-label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)}
+.cs-value{font-size:28px;font-weight:800;line-height:1.1;margin:4px 0 2px;
+  animation:numberUp 0.5s ease-out both}
+.cs-sub{font-size:11px;color:var(--text-muted)}
+.cs-green{color:var(--green-500)}
+.cs-amber{color:var(--amber)}
+.cs-muted{color:var(--text-muted)}
+.cs-badge-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.cs-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+}
+.cs-badge.green{background:var(--green-50);color:var(--green-600);border:1px solid var(--green-200)}
+.cs-badge.amber{background:var(--amber-light);color:var(--amber);border:1px solid rgba(245,158,11,0.3)}
+[data-theme="dark"] .cs-badge.green{background:rgba(43,165,99,0.1);border-color:rgba(43,165,99,0.2);color:var(--green-300)}
+[data-theme="dark"] .cs-badge.amber{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2)}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1200px){
+  .main-grid{grid-template-columns:280px 1fr}
+  .bottom-grid{grid-template-columns:1fr}
+}
+@media(max-width:1024px){
+  .main-grid{grid-template-columns:1fr}
+  .top3-row{grid-template-columns:repeat(3,1fr)}
+  .bottom-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .top3-row{grid-template-columns:1fr}
+  .status-ribbon{flex-direction:column;gap:12px}
+  .action-bar{flex-wrap:wrap}
+  .confidence-strip{flex-wrap:wrap}
+}
+</style>
+
+<body>
+<div class="app">
+  <!-- ═══ SIDEBAR (untouched) ═══ -->
+  {% include 'cooperative/components/sidebar.html' %}
+
+  <div class="main">
+    <!-- ═══ TOPBAR (untouched) ═══ -->
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <span class="sep">/</span>
+        <a href="{{ url_for('get_recommendation') }}">Recommendation</a>
+        <span class="sep">/</span>
+        <span class="current">Results</span>
+      </div>
+
+      <div class="topbar-actions">
+
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
+      <div class="user-btn">
+        <div class="avatar">{{ cooperative_name[:2] if cooperative_name else 'CO' }}</div>
+        {{ cooperative_name if cooperative_name else 'Cooperative' }}
+      </div>
+    </div>
+    </div>
+
+    <!-- ═══ CONTENT ═══ -->
+    <div class="content">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Crop Recommendation Results</h1>
+          <p>AI-powered analysis based on soil, climate and location data</p>
+        </div>
+
+      </div>
+
+      <!-- STATUS RIBBON -->
+      <div class="status-ribbon">
+        <div class="ribbon-farmer">
+          <div class="ribbon-avatar">{{ recommendation.farmer.name[:2].upper() if recommendation.farmer else 'NA' }}</div>
+          <div>
+            <div class="ribbon-name">{{ recommendation.farmer.name if recommendation.farmer else 'Unknown Farmer' }}</div>
+            <div class="ribbon-sub">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Registered Farmer &middot; {{ cooperative_name if cooperative_name else 'Cooperative' }}
+            </div>
+          </div>
+        </div>
+        <div class="ribbon-pills">
+          <div class="ribbon-pill">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ recommendation.farm_district or 'Not specified' }}
+          </div>
+          <div class="ribbon-pill">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            {{ recommendation.season.value if recommendation.season else 'N/A' }}
+          </div>
+          <div class="ribbon-pill">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            {{ recommendation.altitude|int if recommendation.altitude else 'N/A' }}m altitude
+          </div>
+          <div class="ribbon-pill">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {{ recommendation.created_at.strftime('%d %b %Y') if recommendation.created_at else 'Today' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID: Farmer Profile LEFT | Right Panel RIGHT -->
+      <div class="main-grid">
+
+        <!-- ═══ LEFT: FARMER PROFILE PANEL ═══ -->
+        <div class="farmer-panel" style="animation:slideUp 0.45s ease-out 0.2s both">
+
+          <div class="farmer-panel-body">
+            <!-- Quick stats -->
+            <div class="fp-stats-row">
+              <div class="fp-stat">
+                <div class="fp-stat-value">{{ recommendation.altitude|int if recommendation.altitude else 'N/A' }}m</div>
+                <div class="fp-stat-label">Altitude</div>
+              </div>
+              <div class="fp-stat">
+                <div class="fp-stat-value">{{ recommendation.temperature|int if recommendation.temperature else 'N/A' }}°</div>
+                <div class="fp-stat-label">Temp °C</div>
+              </div>
+              <div class="fp-stat">
+                <div class="fp-stat-value">{{ recommendation.humidity|int if recommendation.rainfall else 'N/A' }}</div>
+                <div class="fp-stat-label">Humidity mm</div>
+              </div>
+            </div>
+
+            <!-- Soil Composition -->
+            <div>
+              <div class="fp-section-title">Soil Composition</div>
+              <div class="soil-gauges">
+                {% set soil_items = [
+                  ('Nitrogen (N)', recommendation.nitrogen, 200, '#22884F', '🌿'),
+                  ('Phosphorus (P)', recommendation.phosphorus, 150, '#14B8A6', '🔵'),
+                  ('Potassium (K)', recommendation.potassium, 200, '#F59E0B', '🟡'),
+                  ('Soil pH', recommendation.soil_ph, 14, '#8B5CF6', '⚗️'),
+                ] %}
+                {% for name, val, max_val, color, icon in soil_items %}
+                  {% set pct = ((val|float(0)) / max_val * 100)|round(1) if val else 0 %}
+                  <div class="soil-gauge-row">
+                    <div class="soil-gauge-icon" style="background:{{ color }}18">{{ icon }}</div>
+                    <div class="soil-gauge-info">
+                      <div class="soil-gauge-top">
+                        <span class="soil-gauge-name">{{ name }}</span>
+                        <span class="soil-gauge-val">{{ val|float(0)|round(1) if val else 'N/A' }}</span>
+                      </div>
+                      <div class="soil-gauge-track">
+                        <div class="soil-gauge-fill" style="--target-w:{{ [pct,100]|min }}%;background:{{ color }};animation-delay:{{ loop.index * 120 }}ms"></div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+
+
+          </div>
+        </div>
+
+        <!-- ═══ RIGHT PANEL ═══ -->
+        <div class="right-panel">
+          
+          <!-- ACTION BAR -->
+          <div class="action-bar">
+
+            <div class="btn-spacer"></div>
+            <a href="{{ url_for('get_recommendation') }}" class="btn-action btn-outline-green">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Prediction
+            </a>
+            <button class="btn-action btn-primary" onclick="printResults()">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Save &amp; Print
+            </button>
+
+          </div>
+
+                    <!-- TOP 3 PREDICTION CARDS -->
+          <div class="top3-row">
+            {% for pred in predictions[:3] %}
+              <div class="prediction-card pred-card rank-{{ loop.index }}" style="animation:scaleIn 0.4s ease-out {{ 0.3 + loop.index * 0.1 }}s both;opacity:0">
+                {% if loop.index == 1 %}
+                  <div class="best-badge">⭐ Top Prediction</div>
+                  <div class="rank-crown" style="margin-top:12px">👑</div>
+                {% else %}
+                  <div style="margin-top:10px"></div>
+                {% endif %}
+                <div class="crop-emoji-big" style="animation-delay:{{ loop.index * 0.4 }}s">
+                  {{ crop_emojis.get(pred.crop_name, '�') }}
+                </div>
+                <div class="crop-name-big">{{ pred.crop_name }}</div>
+                <!-- Ring chart -->
+                <div class="ring-wrap">
+                  {% set circ = 157 %}
+                  {% set offset = circ - (pred.confidence_score / 100 * circ) %}
+                  <svg width="70" height="70" viewBox="0 0 70 70">
+                    <circle class="ring-bg" cx="35" cy="35" r="25"/>
+                    <circle class="ring-fg rank-{{ loop.index }}"
+                      cx="35" cy="35" r="25"
+                      style="--circ:{{ circ }};--full:{{ circ }};--offset:{{ offset }};
+                             animation-delay:{{ 0.5 + loop.index * 0.15 }}s"/>
+                  </svg>
+                  <div class="ring-label rank-{{ loop.index }}">
+                    <span class="confidence-number" data-target="{{ pred.confidence_score|int }}">0</span><span style="font-size:11px">%</span>
+                    <span class="ring-sub">score</span>
+                  </div>
+                </div>
+                <div class="rank-label-text">Rank {{ loop.index }} {% if loop.index == 1 %}— Top Pick{% elif loop.index == 2 %}— Runner Up{% else %}— Alternate{% endif %}</div>
+              </div>
+            {% endfor %}
+            {% if predictions|length < 3 %}
+              {% for i in range(predictions|length, 3) %}
+                <div class="pred-card rank-{{ i + 1 }}" style="animation:scaleIn 0.4s ease-out {{ 0.5 + i * 0.1 }}s both;opacity:0">
+                  <div style="margin-top:20px"></div>
+                  <div class="crop-emoji-big">❓</div>
+                  <div class="crop-name-big">No prediction</div>
+                  <div class="ring-wrap">
+                    <svg width="70" height="70" viewBox="0 0 70 70"><circle class="ring-bg" cx="35" cy="35" r="25"/></svg>
+                    <div class="ring-label rank-3"><span>0</span><span style="font-size:11px">%</span><span class="ring-sub">score</span></div>
+                  </div>
+                  <div class="rank-label-text">Rank {{ i + 1 }}</div>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+
+          <!-- ADVICE HERO for top crop -->
+          <div class="advice-hero">
+            <div class="advice-hero-header">
+              <div class="advice-crop-badge">{{ crop_emojis.get(predictions[0].crop_name, '🌱') if predictions else '🌾' }}</div>
+              <div class="advice-hero-text">
+                <div class="advice-hero-label">Best Match — Expert Advice</div>
+                <div class="advice-hero-title">Growing {{ predictions[0].crop_name if predictions else 'Your Top Crop' }} in {{ recommendation.farm_district or 'your district' }}</div>
+              </div>
+            </div>
+            <div class="advice-hero-body">
+              <div class="advice-block-item">
+                <div class="abi-icon">🕐</div>
+                <div class="abi-title">Best Planting Window</div>
+                <div class="abi-text">Based on {{ recommendation.season.value if recommendation.season else 'seasonal' }} conditions in {{ recommendation.farm_district or 'your area' }}, optimal sowing begins in September through November for maximum yield potential.</div>
+              </div>
+              <div class="advice-block-item">
+                <div class="abi-icon">💊</div>
+                <div class="abi-title">Soil Preparation</div>
+                <div class="abi-text">Your soil pH reads {{ recommendation.soil_ph|float(0)|round(1) if recommendation.soil_ph else 'N/A' }}. {% if recommendation.soil_ph %}{% if recommendation.soil_ph|float >= 6.0 and recommendation.soil_ph|float <= 7.5 %}This is optimal — no amendment needed.{% elif recommendation.soil_ph|float < 6.0 %}Apply lime to raise pH before planting.{% else %}Apply sulphur to lower pH slightly.{% endif %}{% endif %}</div>
+              </div>
+              <div class="advice-block-item">
+                <div class="abi-icon">🌿</div>
+                <div class="abi-title">Fertilizer Tip</div>
+                <div class="abi-text">Nitrogen levels at {{ recommendation.nitrogen|float(0)|round(0)|int if recommendation.nitrogen else 'N/A' }} kg/ha. {% if recommendation.nitrogen %}{% if recommendation.nitrogen|float < 40 %}Consider basal N dressing at planting.{% else %}Adequate — apply split doses to avoid leaching.{% endif %}{% endif %}</div>
+              </div>
+              <div class="advice-block-item">
+                <div class="abi-icon">💧</div>
+                <div class="abi-title">Irrigation Guide</div>
+                <div class="abi-text">{{ recommendation.rainfall|int if recommendation.rainfall else 'N/A' }}mm annual rainfall recorded. {% if recommendation.rainfall %}{% if recommendation.rainfall|float < 600 %}Supplemental irrigation strongly recommended.{% elif recommendation.rainfall|float > 1200 %}Ensure proper drainage to avoid waterlogging.{% else %}Rainfall is adequate; monitor dry spells.{% endif %}{% endif %}</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ CONFIDENCE COUNT-UP ══ */
+document.addEventListener('DOMContentLoaded', () => {
+  const allNums = document.querySelectorAll('.confidence-number, .confidence-anim');
+  allNums.forEach((el, i) => {
+    const target = parseInt(el.dataset.target || el.textContent) || 0;
+    const delay = (i * 200) + 400;
+    const duration = 1400;
+    setTimeout(() => {
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 4);
+        el.textContent = Math.floor(ease * target) + '%';
+        if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = target + '%';
+      };
+      requestAnimationFrame(tick);
+    }, delay);
+  });
+
+  /* ══ SOIL GAUGE FILL ══ */
+  const fills = document.querySelectorAll('.soil-gauge-fill');
+  fills.forEach(f => {
+    const targetW = f.style.getPropertyValue('--target-w');
+    f.style.setProperty('--target-w', targetW);
+  });
+
+  /* ══ PROGRESS BAR FILL ══ */
+  document.querySelectorAll('.progress-bar, .chart-row-bar').forEach(bar => {
+    const tw = bar.style.getPropertyValue('--target-w') || bar.style.getPropertyValue('--bar-w');
+    if (tw) {
+      bar.style.setProperty('--target-w', tw);
+      bar.style.setProperty('--bar-w', tw);
+    }
+  });
+
+  /* ══ RING ANIMATION TRIGGER ══ */
+  document.querySelectorAll('.ring-fg').forEach(ring => {
+    ring.style.animationPlayState = 'running';
+  });
+});
+
+/* ══ THEME TOGGLE ══ */
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.querySelector('.theme-toggle').textContent = next === 'light' ? '☀' : '☾';
+}
+
+/* ══ PRINT ══ */
+function printResults() { window.print(); }
+</script>
+</body>
+</html>
