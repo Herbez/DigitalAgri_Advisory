@@ -200,3 +200,98 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
     .logo-mark{width:36px;height:36px}
     .project-title{font-size:18px}
 }
+
+        /* ── Role Selector ── */
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .role-card {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .role-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .role-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 12px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+            height: 100%;
+        }
+
+        .role-label:hover {
+            border-color: var(--green-200);
+            background: var(--green-50);
+        }
+
+        .role-card input[type="radio"]:checked + .role-label {
+            border-color: var(--green-500);
+            background: var(--green-50);
+            box-shadow: 0 0 0 3px rgba(34,136,79,0.1);
+        }
+
+        .role-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--green-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--green-600);
+            transition: all var(--transition);
+            margin-bottom: 4px;
+        }
+
+        .role-card input[type="radio"]:checked + .role-label .role-icon {
+            background: var(--green-500);
+            color: white;
+        }
+
+        .role-icon svg { width: 20px; height: 20px; }
+
+        .role-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .role-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        /* ── Conditional Fields ── */
+        .conditional-field {
+            display: none;
+            margin-bottom: 18px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .conditional-field.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }

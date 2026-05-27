@@ -47,17 +47,23 @@ class Cooperative(UserMixin, db.Model):
         return f'coop-{self.id}'
 
 
-class Farmer(db.Model):
+class Farmer(UserMixin, db.Model):
     __tablename__ = 'farmer'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=True)  # Nullable for coop-added farmers
+    password = db.Column(db.String(255), nullable=True)            # Nullable for coop-added farmers
     farmer_district = db.Column(db.String(100))
     phone_number = db.Column(db.String(20))
     farm_size_hectares = db.Column(db.Numeric(6, 2))
     gender = db.Column(db.Enum(Gender))
+    cooperative_id = db.Column(db.Integer, db.ForeignKey('cooperative.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     recommendations = db.relationship('Recommendation', backref='farmer', lazy=True)
+
+    def get_id(self):
+        return f'farmer-{self.id}'
 
 
 class Recommendation(db.Model):
@@ -114,4 +120,6 @@ def load_user(user_id):
         return Admin.query.get(int(user_id.split('-')[1]))
     elif user_id.startswith('coop-'):
         return Cooperative.query.get(int(user_id.split('-')[1]))
+    elif user_id.startswith('farmer-'):
+        return Farmer.query.get(int(user_id.split('-')[1]))
     return None

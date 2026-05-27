@@ -7,6 +7,7 @@ from ml.predictor import predict_crops, CROP_DISPLAY_NAMES
 from sqlalchemy import func
 import os
 import requests
+from datetime import datetime, timedelta
 
 app = create_app()
 
@@ -99,6 +100,7 @@ def index():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+        role = request.form.get('role')
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
@@ -121,28 +123,40 @@ def signup():
             flash('Password must be at least 6 characters long.', 'error')
             return render_template('signup.html', districts=RWANDA_DISTRICTS)
         
-        # Check if user already exists
-        if Cooperative.query.filter_by(email=email).first():
+        # Check if user already exists in either table
+        user_exists = Cooperative.query.filter_by(email=email).first() or \
+                      Farmer.query.filter_by(email=email).first()
+        if user_exists:
             flash('An account with this email already exists.', 'error')
             return render_template('signup.html', districts=RWANDA_DISTRICTS)
         
-        # Create new cooperative
+        # Hash password
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        new_cooperative = Cooperative(
-            name=name,
-            email=email,
-            password=hashed_password,
-            phone_number=phone_number,
-            district=district
-        )
         
         try:
-            db.session.add(new_cooperative)
+            if role == 'cooperative':
+                new_user = Cooperative(
+                    name=name,
+                    email=email,
+                    password=hashed_password,
+                    phone_number=phone_number,
+                    district=district
+                )
+            else:  # farmer
+                new_user = Farmer(
+                    name=name,
+                    email=email,
+                    password=hashed_password,
+                    phone_number=phone_number,
+                    farmer_district=district
+                )
+            
+            db.session.add(new_user)
             db.session.commit()
             
             # Auto-login after signup
-            login_user(new_cooperative)
-            flash('Cooperative account created successfully!', 'success')
+            login_user(new_user)
+            flash('Account created successfully!', 'success')
             return redirect(url_for('dashboard'))
             
         except Exception as e:
@@ -162,12 +176,15 @@ def signin():
             flash('Please enter both email and password.', 'error')
             return render_template('login.html')
         
-        # Check for cooperative user
-        user = Cooperative.query.filter_by(email=email).first()
+        # Check across all user types
+        user = Cooperative.query.filter_by(email=email).first() or \
+               Farmer.query.filter_by(email=email).first() or \
+               Admin.query.filter_by(email=email).first()
         
         if user and bcrypt.check_password_hash(user.password, password):
             login_user(user)
-            user.last_login = db.func.current_timestamp()
+            if hasattr(user, 'last_login'):
+                user.last_login = db.func.current_timestamp()
             db.session.commit()
             
             next_page = request.args.get('next')
@@ -187,88 +204,11 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Get dashboard statistics
+    # Traffic controller for different dashboards
     if isinstance(current_user, Cooperative):
-        # Total farmers registered
-        total_farmers = Farmer.query.count()
-        
-        # Total recommendations
-        total_recs = Recommendation.query.count()
-        
-        # Average farm size
-        avg_farm_size = db.session.query(func.avg(Farmer.farm_size_hectares)).scalar() or 0
-        avg_farm_size = round(float(avg_farm_size), 1)
-        
-        colors = ['#22884F', '#3B82F6', '#F59E0B', '#8B5CF6', '#14B8A6', '#F43F5E']
-
-        def get_seasonal_crop_data(season_enum=None):
-            query = db.session.query(
-                Prediction.crop_name, 
-                func.count(Prediction.id).label('count')
-            ).join(Recommendation)
-            
-            if season_enum:
-                query = query.filter(Recommendation.season == season_enum)
-                
-            results = query.group_by(Prediction.crop_name).order_by(func.count(Prediction.id).desc()).limit(6).all()
-            
-            data = []
-            for i, (name, count) in enumerate(results):
-                # Try exact match, then title-case, then generic fallback
-                # Normalize name for lookup (strip and handle underscores)
-                lookup_name = name.strip()
-                emoji = CROP_EMOJIS.get(lookup_name) or \
-                        CROP_EMOJIS.get(lookup_name.replace('_', ' ').title()) or \
-                        CROP_EMOJIS.get(lookup_name.lower()) or '🌱'
-                
-                data.append({
-                    'name': name.replace('_', ' ').title(), # Clean name for display
-                    'emoji': emoji,
-                    'count': count,
-                    'color': colors[i % len(colors)]
-                })
-            return data
-
-        # Get data for each view
-        top_crops_total = get_seasonal_crop_data(None)
-        top_crops_a = get_seasonal_crop_data(Season.A)
-        top_crops_b = get_seasonal_crop_data(Season.B)
-        top_crops_c = get_seasonal_crop_data(Season.C)
-        
-        seasonal_crops_data = {
-            'total': top_crops_total,
-            'A': top_crops_a,
-            'B': top_crops_b,
-            'C': top_crops_c
-        }
-        
-        # Set top_crops_data for template compatibility
-        top_crops_data = top_crops_total
-
-        # Confidence Score Distribution
-        # High: >= 60, Medium: 40-59, Low: < 40
-        high_conf = Prediction.query.filter(Prediction.confidence_score >= 60).count()
-        med_conf = Prediction.query.filter(Prediction.confidence_score >= 40, Prediction.confidence_score < 60).count()
-        low_conf = Prediction.query.filter(Prediction.confidence_score < 40).count()
-        
-        confidence_distribution = [
-            {'label': 'High (60-100%)', 'val': high_conf, 'color': '#22884F'},
-            {'label': 'Moderate (40-59%)', 'val': med_conf, 'color': '#3B82F6'},
-            {'label': 'Low (<40%)', 'val': low_conf, 'color': '#F59E0B'}
-        ]
-            
-        # Recent recommendations
-        recent_recommendations = Recommendation.query.order_by(Recommendation.created_at.desc()).limit(5).all()
-        
-        return render_template('cooperative/cooperative_dashboard.html', 
-                             total_farmers=total_farmers,
-                             total_recs=total_recs,
-                             avg_farm_size=avg_farm_size,
-                             top_crops_data=top_crops_data,
-                             seasonal_crops_data=seasonal_crops_data,
-                             confidence_distribution=confidence_distribution,
-                             recent_recommendations=recent_recommendations,
-                             cooperative_name=current_user.name)
+        return cooperative_dashboard_view()
+    elif isinstance(current_user, Farmer):
+        return farmer_dashboard_view()
     else:
         # Admin dashboard
         total_cooperatives = Cooperative.query.count()
@@ -277,17 +217,164 @@ def dashboard():
                              total_cooperatives=total_cooperatives,
                              total_farmers=total_farmers)
 
+def cooperative_dashboard_view():
+    # Get dashboard statistics for Cooperative
+    # Total farmers registered to THIS cooperative or all?
+    # Requirement: "farmers that are required in cooperative and there is a table for that"
+    total_farmers = Farmer.query.filter_by(cooperative_id=current_user.id).count()
+    
+    # Total recommendations for farmers in this cooperative
+    total_recs = Recommendation.query.join(Farmer).filter(Farmer.cooperative_id == current_user.id).count()
+    
+    # Average farm size
+    avg_farm_size = db.session.query(func.avg(Farmer.farm_size_hectares)).filter(Farmer.cooperative_id == current_user.id).scalar() or 0
+    avg_farm_size = round(float(avg_farm_size), 1)
+    
+    colors = ['#22884F', '#3B82F6', '#F59E0B', '#8B5CF6', '#14B8A6', '#F43F5E']
+
+    def get_seasonal_crop_data(season_enum=None):
+        query = db.session.query(
+            Prediction.crop_name, 
+            func.count(Prediction.id).label('count')
+        ).join(Recommendation).join(Farmer).filter(Farmer.cooperative_id == current_user.id)
+        
+        if season_enum:
+            query = query.filter(Recommendation.season == season_enum)
+            
+        results = query.group_by(Prediction.crop_name).order_by(func.count(Prediction.id).desc()).limit(6).all()
+        
+        data = []
+        for i, (name, count) in enumerate(results):
+            lookup_name = name.strip()
+            emoji = CROP_EMOJIS.get(lookup_name) or \
+                    CROP_EMOJIS.get(lookup_name.replace('_', ' ').title()) or \
+                    CROP_EMOJIS.get(lookup_name.lower()) or '🌱'
+            
+            data.append({
+                'name': name.replace('_', ' ').title(),
+                'emoji': emoji,
+                'count': count,
+                'color': colors[i % len(colors)]
+            })
+        return data
+
+    seasonal_crops_data = {
+        'total': get_seasonal_crop_data(None),
+        'A': get_seasonal_crop_data(Season.A),
+        'B': get_seasonal_crop_data(Season.B),
+        'C': get_seasonal_crop_data(Season.C)
+    }
+    
+    top_crops_data = seasonal_crops_data['total']
+
+    # Confidence Score Distribution for this coop
+    high_conf = Prediction.query.join(Recommendation).join(Farmer).filter(Farmer.cooperative_id == current_user.id, Prediction.confidence_score >= 60).count()
+    med_conf = Prediction.query.join(Recommendation).join(Farmer).filter(Farmer.cooperative_id == current_user.id, Prediction.confidence_score >= 40, Prediction.confidence_score < 60).count()
+    low_conf = Prediction.query.join(Recommendation).join(Farmer).filter(Farmer.cooperative_id == current_user.id, Prediction.confidence_score < 40).count()
+    
+    confidence_distribution = [
+        {'label': 'High (60-100%)', 'val': high_conf, 'color': '#22884F'},
+        {'label': 'Moderate (40-59%)', 'val': med_conf, 'color': '#3B82F6'},
+        {'label': 'Low (<40%)', 'val': low_conf, 'color': '#F59E0B'}
+    ]
+        
+    recent_recommendations = Recommendation.query.join(Farmer).filter(Farmer.cooperative_id == current_user.id).order_by(Recommendation.created_at.desc()).limit(5).all()
+    
+    return render_template('cooperative/cooperative_dashboard.html', 
+                         total_farmers=total_farmers,
+                         total_recs=total_recs,
+                         avg_farm_size=avg_farm_size,
+                         top_crops_data=top_crops_data,
+                         seasonal_crops_data=seasonal_crops_data,
+                         confidence_distribution=confidence_distribution,
+                         recent_recommendations=recent_recommendations,
+                         cooperative_name=current_user.name)
+
+def farmer_dashboard_view():
+    # Get personal dashboard statistics for Individual Farmer
+    total_recs = Recommendation.query.filter_by(farmer_id=current_user.id).count()
+    
+    # Recent recommendations for THIS farmer
+    recent_recommendations = Recommendation.query.filter_by(farmer_id=current_user.id).order_by(Recommendation.created_at.desc()).limit(5).all()
+    
+    # Get crop distribution for this farmer
+    colors = ['#22884F', '#3B82F6', '#F59E0B', '#8B5CF6', '#14B8A6', '#F43F5E']
+
+    def get_seasonal_crop_data(season_enum=None):
+        query = db.session.query(
+            Prediction.crop_name, 
+            func.count(Prediction.id).label('count')
+        ).join(Recommendation).filter(Recommendation.farmer_id == current_user.id)
+        
+        if season_enum:
+            query = query.filter(Recommendation.season == season_enum)
+            
+        results = query.group_by(Prediction.crop_name).order_by(func.count(Prediction.id).desc()).limit(6).all()
+        
+        data = []
+        for i, (name, count) in enumerate(results):
+            lookup_name = name.strip()
+            emoji = CROP_EMOJIS.get(lookup_name) or \
+                    CROP_EMOJIS.get(lookup_name.replace('_', ' ').title()) or \
+                    CROP_EMOJIS.get(lookup_name.lower()) or '🌱'
+            
+            data.append({
+                'name': name.replace('_', ' ').title(),
+                'emoji': emoji,
+                'count': count,
+                'color': colors[i % len(colors)]
+            })
+        return data
+
+    seasonal_crops_data = {
+        'total': get_seasonal_crop_data(None),
+        'A': get_seasonal_crop_data(Season.A),
+        'B': get_seasonal_crop_data(Season.B),
+        'C': get_seasonal_crop_data(Season.C)
+    }
+    
+    top_crops_data = seasonal_crops_data['total']
+
+    # Confidence Score Distribution for this farmer
+    high_conf = Prediction.query.join(Recommendation).filter(Recommendation.farmer_id == current_user.id, Prediction.confidence_score >= 60).count()
+    med_conf = Prediction.query.join(Recommendation).filter(Recommendation.farmer_id == current_user.id, Prediction.confidence_score >= 40, Prediction.confidence_score < 60).count()
+    low_conf = Prediction.query.join(Recommendation).filter(Recommendation.farmer_id == current_user.id, Prediction.confidence_score < 40).count()
+    
+    confidence_distribution = [
+        {'label': 'High (60-100%)', 'val': high_conf, 'color': '#22884F'},
+        {'label': 'Moderate (40-59%)', 'val': med_conf, 'color': '#3B82F6'},
+        {'label': 'Low (<40%)', 'val': low_conf, 'color': '#F59E0B'}
+    ]
+
+    return render_template('Farmer/farmer_dashboard.html', 
+                         farmer_name=current_user.name,
+                         total_recs=total_recs,
+                         avg_farm_size=float(current_user.farm_size_hectares or 0),
+                         top_crops_data=top_crops_data,
+                         seasonal_crops_data=seasonal_crops_data,
+                         confidence_distribution=confidence_distribution,
+                         recent_recommendations=recent_recommendations)
+
+
 @app.route('/planting-calendar')
 @login_required
 def planting_calendar():
     calendar_data = PlantingCalendar.query.all()
-    return render_template('cooperative/planting_calendar.html', calendar_data=calendar_data)
+    cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
+    farmer_name = current_user.name if isinstance(current_user, Farmer) else None
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+    
+    return render_template(f'{template_folder}/planting_calendar.html', 
+                         calendar_data=calendar_data,
+                         cooperative_name=cooperative_name,
+                         farmer_name=farmer_name)
 
 @app.route('/dashboard/analytics')
 @login_required
 def analytics():
     import json
     cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
+    farmer_name = current_user.name if isinstance(current_user, Farmer) else None
     
     # Load the crop whitelist data
     whitelist_path = os.path.join(app.root_path, 'ml', 'rwanda_crop_whitelist.json')
@@ -297,14 +384,20 @@ def analytics():
             whitelist_data = json.load(f)
     except Exception as e:
         print(f"Error loading whitelist: {e}")
-        
-    return render_template('cooperative/analytics.html', 
+    
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+    return render_template(f'{template_folder}/analytics.html', 
                          cooperative_name=cooperative_name,
+                         farmer_name=farmer_name,
                          whitelist_data=whitelist_data)
 
 @app.route('/dashboard/farmers', methods=['GET', 'POST'])
 @login_required
 def dashboard_farmers():
+    if not isinstance(current_user, Cooperative):
+        flash('Access denied. Only cooperatives can manage farmers.', 'error')
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
         name = request.form.get('name')
         phone_number = request.form.get('phone_number')
@@ -328,13 +421,14 @@ def dashboard_farmers():
                              cooperative_name=current_user.name,
                              rwanda_districts=RWANDA_DISTRICTS)
         
-        # Create new farmer
+        # Create new farmer linked to this cooperative
         new_farmer = Farmer(
             name=name,
             phone_number=phone_number,
             farmer_district=farmer_district,
             farm_size_hectares=farm_size_hectares if farm_size_hectares else None,
-            gender=gender
+            gender=gender,
+            cooperative_id=current_user.id
         )
         
         try:
@@ -345,8 +439,8 @@ def dashboard_farmers():
             db.session.rollback()
             flash('An error occurred while adding the farmer. Please try again.', 'error')
     
-    # Get all farmers for table display
-    farmers = Farmer.query.all()
+    # Get all farmers for THIS cooperative only
+    farmers = Farmer.query.filter_by(cooperative_id=current_user.id).all()
     return render_template('cooperative/farmers.html', 
                          cooperative_name=current_user.name,
                          rwanda_districts=RWANDA_DISTRICTS,
@@ -355,9 +449,17 @@ def dashboard_farmers():
 @app.route('/dashboard/recommendation', methods=['GET', 'POST'])
 @login_required
 def get_recommendation():
+    cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
+    farmer_name = current_user.name if isinstance(current_user, Farmer) else None
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+
     if request.method == 'POST':
         # ── Collect form data ─────────────────────────────────
         farmer_id   = request.form.get('farmer_id')
+        # If it's a farmer, they are their own farmer_id
+        if isinstance(current_user, Farmer):
+            farmer_id = current_user.id
+
         farm_district = request.form.get('farm_district')
         season      = request.form.get('season')
         altitude    = request.form.get('altitude')
@@ -372,11 +474,19 @@ def get_recommendation():
         # ── Validation ────────────────────────────────────────
         if not all([farm_district, season]):
             flash('Farm district and season are required fields.', 'error')
-            farmers = Farmer.query.all()
-            recommendations = Recommendation.query.order_by(
+            if isinstance(current_user, Cooperative):
+                farmers = Farmer.query.filter_by(cooperative_id=current_user.id).all()
+            else:
+                farmers = [current_user]
+
+            recommendations = Recommendation.query.filter_by(farmer_id=current_user.id).order_by(
+                Recommendation.created_at.desc()).limit(50).all() if isinstance(current_user, Farmer) else \
+                Recommendation.query.join(Farmer).filter(Farmer.cooperative_id == current_user.id).order_by(
                 Recommendation.created_at.desc()).limit(50).all()
-            return render_template('cooperative/recommendation.html',
-                                   cooperative_name=current_user.name,
+
+            return render_template(f'{template_folder}/recommendation.html',
+                                   cooperative_name=cooperative_name,
+                                   farmer_name=farmer_name,
                                    rwanda_districts=RWANDA_DISTRICTS,
                                    farmers=farmers,
                                    recommendations=recommendations)
@@ -398,7 +508,6 @@ def get_recommendation():
             predictions = predict_crops(input_data, district=farm_district, season=season)
         except Exception as e:
             print(f"ML Prediction error: {e}")
-            # Safe fallback — uses whitelist crops for the district if possible
             predictions = [
                 {'crop_name': 'Maize',        'confidence_score': 60.0, 'source': 'fallback'},
                 {'crop_name': 'Beans',        'confidence_score': 25.0, 'source': 'fallback'},
@@ -407,7 +516,7 @@ def get_recommendation():
 
         # ── Save recommendation record ────────────────────────
         new_recommendation = Recommendation(
-            farmer_id=int(farmer_id) if farmer_id else 1,
+            farmer_id=int(farmer_id) if farmer_id else (current_user.id if isinstance(current_user, Farmer) else 1),
             farm_district=farm_district,
             season=season,
             altitude=float(altitude)    if altitude    else None,
@@ -424,7 +533,6 @@ def get_recommendation():
             db.session.add(new_recommendation)
             db.session.commit()
 
-            # ── Save each prediction to Prediction table ──────
             for pred in predictions:
                 db.session.add(Prediction(
                     recommendation_id=new_recommendation.id,
@@ -441,12 +549,18 @@ def get_recommendation():
             print(f"Database error: {e}")
 
     # ── GET — render the form ─────────────────────────────────
-    farmers = Farmer.query.all()
-    recommendations = Recommendation.query.order_by(
-        Recommendation.created_at.desc()).limit(50).all()
+    if isinstance(current_user, Cooperative):
+        farmers = Farmer.query.filter_by(cooperative_id=current_user.id).all()
+        recommendations = Recommendation.query.join(Farmer).filter(Farmer.cooperative_id == current_user.id).order_by(
+            Recommendation.created_at.desc()).limit(50).all()
+    else:
+        farmers = [current_user]
+        recommendations = Recommendation.query.filter_by(farmer_id=current_user.id).order_by(
+            Recommendation.created_at.desc()).limit(50).all()
 
-    return render_template('cooperative/recommendation.html',
-                           cooperative_name=current_user.name,
+    return render_template(f'{template_folder}/recommendation.html',
+                           cooperative_name=cooperative_name,
+                           farmer_name=farmer_name,
                            rwanda_districts=RWANDA_DISTRICTS,
                            farmers=farmers,
                            recommendations=recommendations)
@@ -455,15 +569,28 @@ def get_recommendation():
 @login_required
 def weather_forecast():
     cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
-    return render_template('cooperative/weather_forecast.html', cooperative_name=cooperative_name)
+    farmer_name = current_user.name if isinstance(current_user, Farmer) else None
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+    return render_template(f'{template_folder}/weather_forecast.html', 
+                         cooperative_name=cooperative_name,
+                         farmer_name=farmer_name)
 
 @app.route('/history')
 @login_required
 def history():
     cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
-    # fetch recent recommendations (most recent first)
-    recommendations = Recommendation.query.order_by(Recommendation.created_at.desc()).limit(200).all()
-    return render_template('cooperative/history.html', cooperative_name=cooperative_name, recommendations=recommendations)
+    farmer_name = current_user.name if isinstance(current_user, Farmer) else None
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+    
+    if isinstance(current_user, Cooperative):
+        recommendations = Recommendation.query.join(Farmer).filter(Farmer.cooperative_id == current_user.id).order_by(Recommendation.created_at.desc()).limit(200).all()
+    else:
+        recommendations = Recommendation.query.filter_by(farmer_id=current_user.id).order_by(Recommendation.created_at.desc()).limit(200).all()
+        
+    return render_template(f'{template_folder}/history.html', 
+                         cooperative_name=cooperative_name, 
+                         farmer_name=farmer_name,
+                         recommendations=recommendations)
 
 @app.route('/api/weather/<district_name>')
 @login_required
@@ -547,12 +674,12 @@ def parse_weather_data(weather_data, forecast_data, district_name, altitude=1567
 
 def parse_forecast(forecast_data):
     """Parse 5-day forecast from API"""
-    days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     daily_data = {}
     
     for item in forecast_data['list']:
-        date = item['dt']
-        day_index = date % 7  # Simple day calculation
+        dt = datetime.fromtimestamp(item['dt'])
+        day_index = dt.weekday()
         
         if day_index not in daily_data:
             daily_data[day_index] = {
@@ -566,11 +693,11 @@ def parse_forecast(forecast_data):
         daily_data[day_index]['low'] = min(daily_data[day_index]['low'], item['main']['temp_min'])
         daily_data[day_index]['rain'] += item.get('rain', {}).get('3h', 0)
     
-    # Convert to list
-    today = 0  # Simplified
+    # Convert to list starting from tomorrow
+    today_index = datetime.now().weekday()
     forecast = []
-    for i in range(7):
-        day_index = (today + i) % 7
+    for i in range(1, 8):  # Start from 1 to 7 (tomorrow to next 7 days)
+        day_index = (today_index + i) % 7
         if day_index in daily_data:
             d = daily_data[day_index]
             forecast.append({
@@ -639,13 +766,21 @@ def generate_demo_weather_data(district_name, altitude=1567):
 
 def generate_demo_forecast():
     """Generate demo 7-day forecast"""
-    days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     icons = ['☀️', '⛅', '🌧️', '☀️', '⛅', '🌧️', '☀️']
+    today_index = datetime.now().weekday()
     
-    return [
-        {'day': days[i], 'icon': icons[i], 'high': 24 + i % 4, 'low': 16 + i % 3, 'rain': (i % 3) * 10}
-        for i in range(7)
-    ]
+    forecast = []
+    for i in range(1, 8):
+        day_idx = (today_index + i) % 7
+        forecast.append({
+            'day': days[day_idx], 
+            'icon': icons[day_idx], 
+            'high': 24 + i % 4, 
+            'low': 16 + i % 3, 
+            'rain': (i % 3) * 10
+        })
+    return forecast
 
 def generate_weekly_rainfall(level):
     """Generate 8-week rainfall trend"""
@@ -668,10 +803,15 @@ def recommendation_results(res_id):
     # Get all predictions for this recommendation
     predictions = Prediction.query.filter_by(recommendation_id=res_id).order_by(Prediction.confidence_score.desc()).all()
     
-    return render_template('cooperative/recommendation_results.html',
-                         cooperative_name=current_user.name,
+    cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
+    farmer_name = current_user.name if isinstance(current_user, Farmer) else None
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+    
+    return render_template(f'{template_folder}/recommendation_results.html',
                          recommendation=recommendation,
-                         predictions=predictions)
+                         predictions=predictions,
+                         cooperative_name=cooperative_name,
+                         farmer_name=farmer_name)
 
 if __name__ == '__main__':
     with app.app_context():

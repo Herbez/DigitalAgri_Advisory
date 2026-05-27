@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DigitalAgri — Get Recommendation</title>
+<title>DigitalAgri — History</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css"/>
@@ -62,11 +62,6 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 
 /* ── APP SHELL ── */
 .app{display:flex;height:100vh;overflow:hidden}
-
-/* ── PAGE HEADER ── */
-.page-header{margin-bottom:26px}
-.page-title{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;margin-bottom:1px}
-.page-sub{font-size:14px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
 
 /* ── SIDEBAR ── */
 .sidebar{
@@ -148,6 +143,12 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 
 /* ── CONTENT ── */
 .content{padding:24px;min-height:calc(100vh - var(--topbar-h))}
+
+/* Page header */
+.page-header{margin-bottom:26px}
+.page-title{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;margin-bottom:1px}
+.page-sub{font-size:14px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+
 
 /* ── FORM CARD ── */
 .form-card{background:var(--surface);border:0.5px solid var(--border-tertiary);border-radius:var(--radius-lg);
@@ -303,161 +304,87 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
 </head>
 <body>
 <div class="app">
-{% include 'cooperative/components/sidebar.html' %}
+{% include 'Farmer/components/sidebar.html' %}
 
 <div class="main">
-  <header class="topbar">
-    <div class="breadcrumb">
-      <a href="{{ url_for('dashboard') }}">Dashboard</a>
-      <span class="sep">›</span>
-      <span class="current">Get Recommendation</span>
-    </div>
-
-    <div class="topbar-actions">
-
-      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
-      <div class="user-btn">
-        <div class="avatar">{{ cooperative_name[:2] if cooperative_name else 'CO' }}</div>
-        {{ cooperative_name if cooperative_name else 'Cooperative' }}
-      </div>
-    </div>
-  </header>
+  {% include 'Farmer/components/topbar.html' %}
 
   <div class="content">
-
-    <div class="page-header">
-        <div>
-          <div class="page-title">Get Crop Recommendation</div>
-          <div class="page-sub">
-          Enter farm conditions to get ML-based crop prediction
-          </div>
-        </div>  
-    </div>
     <!-- Section 1: Form Card -->
 
-    <div class="form-card">
-
-      <form id="recommendationForm" method="post" action="{{ url_for('get_recommendation') }}">
-        <div class="form-two-columns">
-          <!-- Left Column -->
-          <div class="form-column">
-            <div class="column-header">
-              <svg class="column-header-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span class="column-header-title">Farm & Farmer Info</span>
+    <div class="page-header">
+            <div>
+            <div class="page-title">History recommendations</div>
+            <div class="page-sub">
+            Review your previous crop recommendations and predictions
             </div>
-
-            <div class="form-group">
-              <label class="form-label">Select Farmer</label>
-              <select class="form-select" id="farmerSelect" name="farmer_id" onchange="showFarmerDistrict()">
-                <option value="">Choose a farmer...</option>
-                {% for farmer in farmers %}
-                  <option value="{{ farmer.id }}" data-district="{{ farmer.farmer_district }}">{{ farmer.name }}</option>
-                {% endfor %}
-              </select>
-              <div id="farmerDistrictChip" class="info-chip" style="display:none;">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span id="farmerDistrictText">Home district: </span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Farm District</label>
-              <select class="form-select" id="farmDistrict" name="farm_district" onchange="suggestAltitude()">
-                <option value="">Where is the farm located?</option>
-                {% for district in rwanda_districts %}
-                  <option value="{{ district }}">{{ district }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Season</label>
-              <div class="season-toggles">
-                <button type="button" class="season-toggle active" data-season="A" onclick="selectSeason(this)">Season A <br> <small>(Sep–Feb)</small></button>
-                <button type="button" class="season-toggle" data-season="B" onclick="selectSeason(this)">Season B <br> <small>(Mar–Jun)</small></button>
-                <button type="button" class="season-toggle" data-season="C" onclick="selectSeason(this)">Season C <br> <small>(Jul–Sep)</small></button>
-              </div>
-              <input type="hidden" id="selectedSeason" name="season" value="A">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Altitude (m)</label>
-              <input type="number" class="form-input" id="altitude" name="altitude" placeholder="e.g., 1800" step="10">
-              <div id="altitudeHint" class="form-hint" style="display:none;"></div>
-            </div>
-          </div>
-
-          <!-- Divider -->
-          <div class="column-divider"></div>
-
-          <!-- Right Column -->
-          <div class="form-column">
-            <div class="column-header">
-              <svg class="column-header-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="2" y2="16"/></svg>
-              <span class="column-header-title">Farm Conditions</span>
-            </div>
-
-            <!-- Soil Data Group -->
-            <div class="sub-group">
-              <div class="sub-group-label">
-                <span class="pill-badge gray">Soil test results</span>
-              </div>
-              <div class="field-grid-2x2">
-                <div class="form-group">
-                  <label class="form-label">Soil pH</label>
-                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5" step="0.1" min="4" max="8.5">
-                  <div class="form-hint">Range: 4.0 – 8.5</div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Nitrogen</label>
-                  <input type="number" class="form-input" name="nitrogen" placeholder="kg/ha" step="1">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Phosphorus</label>
-                  <input type="number" class="form-input" name="phosphorus" placeholder="kg/ha" step="1">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Potassium</label>
-                  <input type="number" class="form-input" name="potassium" placeholder="kg/ha" step="1">
-                </div>
-              </div>
-            </div>
-
-            <!-- Weather Data Group -->
-            <div class="sub-group">
-              <div class="sub-group-label">
-                <span class="pill-badge amber">From Meteo Rwanda</span>
-                <a href="https://www.meteorwanda.gov.rw/" target="_blank" class="external-link" style="margin-left:8px;">
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                </a>
-              </div>
-              <div class="field-grid-3">
-                <div class="form-group">
-                  <label class="form-label">Rainfall (mm)</label>
-                  <input type="number" class="form-input" name="rainfall" placeholder="mm" step="1">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Temperature (°C)</label>
-                  <input type="number" class="form-input" name="temperature" placeholder="°C" step="0.1">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Humidity (%)</label>
-                  <input type="number" class="form-input" name="humidity" placeholder="%" step="1" min="0" max="100">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-submit" id="submitBtn">
-          <svg class="btn-submit-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          <span class="btn-submit-text">Get Recommendation →</span>
-          <div class="spinner"></div>
-        </button>
-      </form>
     </div>
+       
+      </div>
 
 
+    <!-- Section 2: Recent Recommendations Table -->
+    <div class="table-section">
+      <div class="table-header">
+        <div>
+          <span class="table-title">History Recommendations</span>
+          <span class="count-badge">{{ recommendations|length if recommendations else 0 }}</span>
+        </div>
+        <div class="table-search">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><line x1="16" y1="16" x2="12.5" y2="12.5"/></svg>
+          <input type="text" id="tableSearch" placeholder="Search by farmer name..." onkeyup="filterTable()">
+        </div>
+      </div>
+
+      <div class="recommendations-table">
+        {% if recommendations and recommendations|length > 0 %}
+          <table class="rec-table">
+            <thead>
+              <tr>
+                <th>Farmer</th>
+                <th>Farm District</th>
+                <th>Season</th>
+                <th>Top Crop</th>
+                <th>Confidence</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="recommendationsBody">
+              {% for rec in recommendations %}
+                <tr style="animation-delay: {{ loop.index * 60 }}ms;">
+                  <td>
+                    <div class="farmer-cell-name">{{ rec.farmer.name if rec.farmer else 'Unknown' }}</div>
+                    <div class="farmer-cell-district">{{ rec.farmer.farmer_district if rec.farmer else '' }}</div>
+                  </td>
+                  <td>{{ rec.farm_district or 'Not specified' }}</td>
+                  <td><span class="season-badge">{{ rec.season.value if rec.season else 'N/A' }}</span></td>
+                  <td>
+                    <div class="crop-cell">
+                      <svg class="crop-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                      {{ rec.predictions[0].crop_name if rec.predictions else 'N/A' }}
+                    </div>
+                  </td>
+                  <td><span class="confidence-badge">{{ rec.predictions[0].confidence_score|int if rec.predictions else 0 }}%</span></td>
+                  <td>{{ rec.created_at.strftime('%d %b %Y') if rec.created_at else 'Unknown' }}</td>
+                  <td>
+                    <a href="{{ url_for('recommendation_results', res_id=rec.id) }}" class="btn-view">
+                      <svg class="btn-view-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      View
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="empty-state">
+            <svg class="empty-state-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <div class="empty-state-text">No recommendations yet. Fill the form above to get started.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 </div>

@@ -42,18 +42,71 @@
                         {% endfor %}
                     {% endif %}
                 {% endwith %}
+
+                 <!-- Role Selector -->
+                <div class="role-selector">
+                    <div class="role-card">
+                        <input type="radio" name="role_select" id="role_farmer" value="farmer" checked>
+                        <label class="role-label" for="role_farmer">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <span class="role-name">Farmer</span>
+                            <span class="role-desc">Personal account</span>
+                        </label>
+                    </div>
+                    <div class="role-card">
+                        <input type="radio" name="role_select" id="role_admin" value="cooperative">
+                        <label class="role-label" for="role_admin">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
+                            <span class="role-name">Cooperative</span>
+                            <span class="role-desc">Organization account</span>
+                        </label>
+                    </div>
+                </div>
                 
                 <form method="post" action="{{ url_for('signup') }}">
-                    <div class="form-group">
-                        <label class="form-label">Cooperative Name</label>
-                        <div class="input-wrapper">
-                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            <input type="text" name="name" class="form-input" placeholder=" Cooperative name"  required>
+
+                    <!-- Hidden role field submitted with form -->
+                    <input type="hidden" name="role" id="role_value" value="farmer">
+
+                    <!-- Cooperative Name — only for admin -->
+                    <div class="conditional-field" id="coop-name-field">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Cooperative Name</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                <input type="text" name="name" class="form-input" placeholder="Cooperative name" id="coop_name_input" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Name — only for farmer -->
+                    <div class="conditional-field visible" id="farmer-name-field">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Full Name</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <input type="text" name="name" class="form-input" placeholder="Your full name" id="farmer_name_input" required>
+                            </div>
                         </div>
                     </div>
                     
@@ -64,7 +117,7 @@
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
-                            <input type="email" name="email" class="form-input" placeholder="cooperative@example.com" required>
+                            <input type="email" name="email" class="form-input" placeholder="farmer@example.com" id="email_input" required>
                         </div>
                     </div>
                     
@@ -74,7 +127,7 @@
                             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
-                            <input type="tel" name="phone_number" class="form-input" placeholder="+250 788 123 456" pattern="[+][0-9]{1,3}[0-9]{3,}" title="Please enter a valid phone number with country code">
+                            <input type="tel" name="phone_number" class="form-input" placeholder="+250 788 123 456" required>
                         </div>
                     </div>
                     
@@ -144,6 +197,41 @@
         </div>
     </div>
     <script>
+        // Role switching logic
+        const roleRadios = document.querySelectorAll('input[name="role_select"]');
+        const roleValue = document.getElementById('role_value');
+        const farmerField = document.getElementById('farmer-name-field');
+        const coopField = document.getElementById('coop-name-field');
+        const farmerInput = document.getElementById('farmer_name_input');
+         const coopInput = document.getElementById('coop_name_input');
+         const emailInput = document.getElementById('email_input');
+
+         roleRadios.forEach(radio => {
+             radio.addEventListener('change', (e) => {
+                 const selectedRole = e.target.value;
+                 roleValue.value = selectedRole;
+                 
+                 if (selectedRole === 'farmer') {
+                     farmerField.classList.add('visible');
+                     coopField.classList.remove('visible');
+                     farmerInput.setAttribute('required', '');
+                     coopInput.removeAttribute('required');
+                     farmerInput.disabled = false;
+                     coopInput.disabled = true;
+                     emailInput.placeholder = 'farmer@example.com';
+                 } else {
+                     coopField.classList.add('visible');
+                     farmerField.classList.remove('visible');
+                     coopInput.setAttribute('required', '');
+                     farmerInput.removeAttribute('required');
+                     coopInput.disabled = false;
+                     farmerInput.disabled = true;
+                     emailInput.placeholder = 'cooperative@example.com';
+                 }
+             });
+         });
+
+        // Password toggle
         function togglePassword(fieldId) {
             const passwordInput = document.getElementById(fieldId);
             const eyeIcon = document.getElementById(fieldId + '-eye-icon');

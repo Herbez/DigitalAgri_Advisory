@@ -1,0 +1,15 @@
+<header class="topbar">
+    <div class="breadcrumb">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span class="sep">›</span>
+      <span class="current">Farmer</span>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
+      <div class="user-btn">
+        <div class="avatar">{{ farmer_name[:2].upper() if farmer_name else 'FA' }}</div>
+        {{ farmer_name if farmer_name else 'Farmer' }} ▾
+      </div>
+    </div>
+  </header>
