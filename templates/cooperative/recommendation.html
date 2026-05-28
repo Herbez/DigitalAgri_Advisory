@@ -405,20 +405,20 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
               <div class="field-grid-2x2">
                 <div class="form-group">
                   <label class="form-label">Soil pH</label>
-                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5" step="0.1" min="4" max="8.5">
+                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5" step="0.1">
                   <div class="form-hint">Range: 4.0 – 8.5</div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Nitrogen</label>
-                  <input type="number" class="form-input" name="nitrogen" placeholder="kg/ha" step="1">
+                  <input type="number" class="form-input" name="nitrogen" placeholder="e.g. 0.45" step="0.01">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Phosphorus</label>
-                  <input type="number" class="form-input" name="phosphorus" placeholder="kg/ha" step="1">
+                  <input type="number" class="form-input" name="phosphorus" placeholder="e.g. 0.15" step="0.01">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Potassium</label>
-                  <input type="number" class="form-input" name="potassium" placeholder="kg/ha" step="1">
+                  <input type="number" class="form-input" name="potassium" placeholder="e.g. 0.35" step="0.01">
                 </div>
               </div>
             </div>
@@ -459,35 +459,8 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
 </div>
 
 <script>
-// District altitude suggestions
-const districtAltitudes = {
-  "Kigali": 1567,
-  "Nyarugenge": 1567,
-  "Gasabo": 1567,
-  "Kicukiro": 1567,
-  "Burera": 2300,
-  "Gicumbi": 1850,
-  "Musanze": 1800,
-  "Rulindo": 1900,
-  "Gisagara": 1450,
-  "Huye": 1700,
-  "Kamonyi": 1600,
-  "Muhanga": 1650,
-  "Nyamagabe": 2000,
-  "Nyanza": 1550,
-  "Ruhango": 1600,
-  "Bugesera": 1400,
-  "Gatsibo": 1500,
-  "Kayonza": 1450,
-  "Kirehe": 1500,
-  "Ngoma": 1400,
-  "Rwamagana": 1550,
-  "Karongi": 1900,
-  "Ngororero": 1800,
-  "Nyabihu": 2200,
-  "Rubavu": 1500,
-  "Rutsiro": 1700
-};
+// District data from CSV
+const districtAverages = {{ district_averages | safe }};
 
 // Show farmer district chip
 function showFarmerDistrict() {
@@ -505,20 +478,40 @@ function showFarmerDistrict() {
   }
 }
 
-// Suggest altitude based on district
+// Suggest soil data and altitude based on district
 function suggestAltitude() {
   const select = document.getElementById('farmDistrict');
   const altitudeInput = document.getElementById('altitude');
   const hint = document.getElementById('altitudeHint');
+  const soilPhInput = document.querySelector('input[name="soil_ph"]');
+  const nitrogenInput = document.querySelector('input[name="nitrogen"]');
+  const phosphorusInput = document.querySelector('input[name="phosphorus"]');
+  const potassiumInput = document.querySelector('input[name="potassium"]');
   
   const district = select.value;
-  if (district && districtAltitudes[district]) {
-    const suggestedAlt = districtAltitudes[district];
-    hint.textContent = 'Suggested for ' + district + ': ~' + suggestedAlt.toLocaleString() + 'm';
-    hint.style.display = 'block';
-    altitudeInput.classList.add('glow');
-    if (!altitudeInput.value) {
-      altitudeInput.value = suggestedAlt;
+  if (district && districtAverages[district]) {
+    const data = districtAverages[district];
+    
+    // Update altitude
+    if (data.altitude) {
+      hint.textContent = 'Suggested for ' + district + ': ~' + Math.round(data.altitude).toLocaleString() + 'm';
+      hint.style.display = 'block';
+      altitudeInput.classList.add('glow');
+      altitudeInput.value = Math.round(data.altitude); // Update even if not empty!
+    }
+    
+    // Update soil data - update even if not empty!
+    if (data.soil_ph) {
+      soilPhInput.value = data.soil_ph.toFixed(2);
+    }
+    if (data.nitrogen) {
+      nitrogenInput.value = data.nitrogen.toFixed(2);
+    }
+    if (data.phosphorus) {
+      phosphorusInput.value = data.phosphorus.toFixed(2);
+    }
+    if (data.potassium) {
+      potassiumInput.value = data.potassium.toFixed(2);
     }
   } else {
     hint.style.display = 'none';

@@ -772,7 +772,7 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
               <div class="advice-block-item">
                 <div class="abi-icon">🌿</div>
                 <div class="abi-title">Fertilizer Tip</div>
-                <div class="abi-text">Nitrogen levels at {{ recommendation.nitrogen|float(0)|round(0)|int if recommendation.nitrogen else 'N/A' }} kg/ha. {% if recommendation.nitrogen %}{% if recommendation.nitrogen|float < 40 %}Consider basal N dressing at planting.{% else %}Adequate — apply split doses to avoid leaching.{% endif %}{% endif %}</div>
+                <div class="abi-text">Nitrogen levels at {{ recommendation.nitrogen|float(0)|round(2) if recommendation.nitrogen else 'N/A' }}. {% if recommendation.nitrogen %}{% if recommendation.nitrogen|float < 0.3 %}Consider basal N dressing at planting.{% else %}Adequate — apply split doses to avoid leaching.{% endif %}{% endif %}</div>
               </div>
               <div class="advice-block-item">
                 <div class="abi-icon">💧</div>

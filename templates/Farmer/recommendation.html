@@ -331,19 +331,7 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
               <span class="column-header-title">Farm & Farmer Info</span>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Select Farmer</label>
-              <select class="form-select" id="farmerSelect" name="farmer_id" onchange="showFarmerDistrict()">
-                <option value="">Choose a farmer...</option>
-                {% for farmer in farmers %}
-                  <option value="{{ farmer.id }}" data-district="{{ farmer.farmer_district }}">{{ farmer.name }}</option>
-                {% endfor %}
-              </select>
-              <div id="farmerDistrictChip" class="info-chip" style="display:none;">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span id="farmerDistrictText">Home district: </span>
-              </div>
-            </div>
+            <input type="hidden" name="farmer_id" value="{{ farmers[0].id if farmers else current_user.id }}">
 
             <div class="form-group">
               <label class="form-label">Farm District</label>
@@ -395,15 +383,15 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
                 </div>
                 <div class="form-group">
                   <label class="form-label">Nitrogen</label>
-                  <input type="number" class="form-input" name="nitrogen" placeholder="kg/ha" step="1">
+                  <input type="number" class="form-input" name="nitrogen" placeholder="e.g. 0.45" step="0.01">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Phosphorus</label>
-                  <input type="number" class="form-input" name="phosphorus" placeholder="kg/ha" step="1">
+                  <input type="number" class="form-input" name="phosphorus" placeholder="e.g. 0.15" step="0.01">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Potassium</label>
-                  <input type="number" class="form-input" name="potassium" placeholder="kg/ha" step="1">
+                  <input type="number" class="form-input" name="potassium" placeholder="e.g. 0.35" step="0.01">
                 </div>
               </div>
             </div>
@@ -444,66 +432,43 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
 </div>
 
 <script>
-// District altitude suggestions
-const districtAltitudes = {
-  "Kigali": 1567,
-  "Nyarugenge": 1567,
-  "Gasabo": 1567,
-  "Kicukiro": 1567,
-  "Burera": 2300,
-  "Gicumbi": 1850,
-  "Musanze": 1800,
-  "Rulindo": 1900,
-  "Gisagara": 1450,
-  "Huye": 1700,
-  "Kamonyi": 1600,
-  "Muhanga": 1650,
-  "Nyamagabe": 2000,
-  "Nyanza": 1550,
-  "Ruhango": 1600,
-  "Bugesera": 1400,
-  "Gatsibo": 1500,
-  "Kayonza": 1450,
-  "Kirehe": 1500,
-  "Ngoma": 1400,
-  "Rwamagana": 1550,
-  "Karongi": 1900,
-  "Ngororero": 1800,
-  "Nyabihu": 2200,
-  "Rubavu": 1500,
-  "Rutsiro": 1700
-};
+// District data from CSV
+const districtAverages = {{ district_averages | safe }};
 
-// Show farmer district chip
-function showFarmerDistrict() {
-  const select = document.getElementById('farmerSelect');
-  const chip = document.getElementById('farmerDistrictChip');
-  const text = document.getElementById('farmerDistrictText');
-  
-  const selectedOption = select.options[select.selectedIndex];
-  if (selectedOption.value) {
-    const district = selectedOption.getAttribute('data-district');
-    text.textContent = 'Home district: ' + (district || 'Not specified');
-    chip.style.display = 'inline-flex';
-  } else {
-    chip.style.display = 'none';
-  }
-}
-
-// Suggest altitude based on district
+// Suggest soil data and altitude based on district
 function suggestAltitude() {
   const select = document.getElementById('farmDistrict');
   const altitudeInput = document.getElementById('altitude');
   const hint = document.getElementById('altitudeHint');
+  const soilPhInput = document.querySelector('input[name="soil_ph"]');
+  const nitrogenInput = document.querySelector('input[name="nitrogen"]');
+  const phosphorusInput = document.querySelector('input[name="phosphorus"]');
+  const potassiumInput = document.querySelector('input[name="potassium"]');
   
   const district = select.value;
-  if (district && districtAltitudes[district]) {
-    const suggestedAlt = districtAltitudes[district];
-    hint.textContent = 'Suggested for ' + district + ': ~' + suggestedAlt.toLocaleString() + 'm';
-    hint.style.display = 'block';
-    altitudeInput.classList.add('glow');
-    if (!altitudeInput.value) {
-      altitudeInput.value = suggestedAlt;
+  if (district && districtAverages[district]) {
+    const data = districtAverages[district];
+    
+    // Update altitude
+    if (data.altitude) {
+      hint.textContent = 'Suggested for ' + district + ': ~' + Math.round(data.altitude).toLocaleString() + 'm';
+      hint.style.display = 'block';
+      altitudeInput.classList.add('glow');
+      altitudeInput.value = Math.round(data.altitude); // Update even if not empty
+    }
+    
+    // Update soil data - update even if not empty!
+    if (data.soil_ph) {
+      soilPhInput.value = data.soil_ph.toFixed(2);
+    }
+    if (data.nitrogen) {
+      nitrogenInput.value = data.nitrogen.toFixed(2);
+    }
+    if (data.phosphorus) {
+      phosphorusInput.value = data.phosphorus.toFixed(2);
+    }
+    if (data.potassium) {
+      potassiumInput.value = data.potassium.toFixed(2);
     }
   } else {
     hint.style.display = 'none';

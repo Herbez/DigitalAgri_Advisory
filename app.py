@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+import json
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from __init__ import create_app, db, bcrypt
@@ -7,9 +8,50 @@ from ml.predictor import predict_crops, CROP_DISPLAY_NAMES
 from sqlalchemy import func
 import os
 import requests
+import csv
+from collections import defaultdict
 from datetime import datetime, timedelta
 
 app = create_app()
+
+# Load district soil and altitude data from CSV
+def load_district_data():
+    district_data = defaultdict(lambda: {
+        'soil_ph': [],
+        'nitrogen': [],
+        'phosphorus': [],
+        'potassium': [],
+        'altitude': []
+    })
+    
+    csv_path = os.path.join(os.path.dirname(__file__), 'ml', 'ahs_dataset_nisr.csv')
+    with open(csv_path, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            district = row.get('district_real')
+            if district:
+                try:
+                    if row.get('soil_ph'): district_data[district]['soil_ph'].append(float(row['soil_ph']))
+                    if row.get('nitrogen'): district_data[district]['nitrogen'].append(float(row['nitrogen']))
+                    if row.get('phosphorus'): district_data[district]['phosphorus'].append(float(row['phosphorus']))
+                    if row.get('potassium'): district_data[district]['potassium'].append(float(row['potassium']))
+                    if row.get('altitude_m'): district_data[district]['altitude'].append(float(row['altitude_m']))
+                except ValueError:
+                    continue
+    
+    # Compute averages
+    district_averages = {}
+    for district, values in district_data.items():
+        district_averages[district] = {
+            'soil_ph': sum(values['soil_ph']) / len(values['soil_ph']) if values['soil_ph'] else None,
+            'nitrogen': sum(values['nitrogen']) / len(values['nitrogen']) if values['nitrogen'] else None,
+            'phosphorus': sum(values['phosphorus']) / len(values['phosphorus']) if values['phosphorus'] else None,
+            'potassium': sum(values['potassium']) / len(values['potassium']) if values['potassium'] else None,
+            'altitude': sum(values['altitude']) / len(values['altitude']) if values['altitude'] else None
+        }
+    return district_averages
+
+DISTRICT_AVERAGES = load_district_data()
 
 # OpenWeatherMap API Configuration
 # Get API key from environment variable or set it here
@@ -156,7 +198,7 @@ def signup():
             
             # Auto-login after signup
             login_user(new_user)
-            flash('Account created successfully!', 'success')
+            
             return redirect(url_for('dashboard'))
             
         except Exception as e:
@@ -489,7 +531,8 @@ def get_recommendation():
                                    farmer_name=farmer_name,
                                    rwanda_districts=RWANDA_DISTRICTS,
                                    farmers=farmers,
-                                   recommendations=recommendations)
+                                   recommendations=recommendations,
+                                   district_averages=json.dumps(DISTRICT_AVERAGES))
 
         # ── Build ML input (N/P/K in kg/ha — predictor scales internally) ──
         input_data = {
@@ -563,7 +606,8 @@ def get_recommendation():
                            farmer_name=farmer_name,
                            rwanda_districts=RWANDA_DISTRICTS,
                            farmers=farmers,
-                           recommendations=recommendations)
+                           recommendations=recommendations,
+                           district_averages=json.dumps(DISTRICT_AVERAGES))
 
 @app.route('/dashboard/weather-forecast')
 @login_required
