@@ -1,0 +1,130 @@
+Importance of Inputs Used in the Crop Recommendation System
+
+Your project uses different inputs to predict the best crop for a farmer. Each input is important because crop growth depends on soil condition, weather, location, and farming season.
+
+1. Farmer
+
+The farmer input helps identify who owns the prediction and allows the system to save records of recommendations.
+
+Why it is important:
+
+Helps track prediction history for each farmer.
+Makes it easier to manage recommendations.
+
+Example:
+If Farmer Jean receives a maize recommendation today, the system can save it for future reference.
+
+2. District
+
+Different districts have different climates, rainfall, and environmental conditions.
+
+Why it is important:
+
+Helps the system recommend crops suitable for a specific location.
+Climate conditions differ from one district to another.
+
+Example:
+A crop that grows well in Ngoma may not grow well in Musanze because of climate differences.
+
+3. Altitude
+
+Altitude is the height of an area above sea level. It affects temperature and rainfall.
+
+Why it is important:
+
+High-altitude areas are cooler.
+Low-altitude areas are warmer.
+
+Example:
+Irish potatoes grow better in cool highland areas, while cassava grows better in warmer lowland areas.
+
+4. Soil pH
+
+Soil pH shows whether the soil is acidic or alkaline. It affects nutrient absorption by crops.
+
+Why it is important:
+
+Different crops grow well in different soil pH levels.
+Poor soil pH can reduce crop growth.
+
+Example:
+Beans may grow better in slightly acidic soil.
+
+5. Nitrogen (N)
+
+Nitrogen helps plants grow healthy leaves and stems.
+
+Why it is important:
+
+Supports plant growth and greenness.
+
+Example:
+Maize needs enough nitrogen to grow tall and healthy.
+
+6. Phosphorus (P)
+
+Phosphorus supports strong root growth and seed development.
+
+Why it is important:
+
+Helps plants develop stronger roots.
+Improves crop production.
+
+Example:
+Beans and maize need phosphorus for healthy growth.
+
+7. Potassium (K)
+
+Potassium helps plants resist diseases and manage water properly.
+
+Why it is important:
+
+Helps crops survive dry conditions.
+Improves plant strength.
+
+Example:
+Potassium helps crops stay healthy during hot weather.
+
+8. Temperature
+
+Temperature affects crop growth and development.
+
+Why it is important:
+
+Each crop grows best under a certain temperature range.
+
+Example:
+Potatoes prefer cooler temperatures, while maize grows better in warmer conditions.
+
+9. Humidity
+
+Humidity means the amount of moisture in the air.
+
+Why it is important:
+
+Affects plant health and disease levels.
+
+Example:
+Very high humidity can sometimes increase crop diseases.
+
+10. Season
+
+Season is an important factor because crops grow differently depending on the farming period.
+
+In Rwanda, there are three agricultural seasons:
+
+Season A: September – February
+Season B: March – June
+Season C: July – September
+
+Why it is important:
+
+Some crops grow better in certain seasons because of rainfall and weather conditions.
+Helps the system recommend crops suitable for the current farming season.
+
+Example:
+Beans and maize may perform well in Season A or B, while vegetables and sweet potatoes are often suitable for Season C, especially in irrigated areas.
+
+Conclusion
+
+All these inputs help the system understand the farmer’s location, soil condition, weather, and farming season. By combining this information, the AI system can recommend the best crop for a farmer, helping improve productivity and reduce farming risks.
