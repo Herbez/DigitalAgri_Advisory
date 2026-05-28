@@ -43,6 +43,42 @@
   --transition:0.22s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* Enhanced Visibility & Font Sizes */
+.form-label { font-size: 15px !important; font-weight: 700 !important; color: var(--text-primary) !important; margin-bottom: 8px !important; }
+.form-input, .form-select { font-size: 16px !important; padding: 12px 14px !important; border-width: 2px !important; font-weight: 500 !important; }
+.data-table { font-size: 15px !important; }
+.data-table th { font-size: 13px !important; padding: 16px !important; color: var(--text-primary) !important; background: var(--surface-2) !important; }
+.data-table td { padding: 16px !important; color: var(--text-primary) !important; border-bottom: 1.5px solid var(--border) !important; }
+.farmer-name { font-size: 16px !important; }
+.farmer-email { font-size: 14px !important; }
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5); display: none; align-items: center;
+  justify-content: center; z-index: 1000; backdrop-filter: blur(4px);
+}
+.modal-content {
+  background: var(--surface); padding: 32px; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); max-width: 400px; width: 90%; text-align: center;
+  border: 1px solid var(--border);
+}
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); }
+.modal-text { font-size: 16px; color: var(--text-secondary); margin-bottom: 24px; }
+.modal-actions { display: flex; gap: 12px; justify-content: center; }
+.btn-modal { padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; }
+.btn-ok { background: var(--green-500); color: white; }
+.btn-cancel { background: var(--surface-2); color: var(--text-secondary); border: 1.5px solid var(--border); }
+
+/* Action Buttons */
+.action-btn { background: none; border: none; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s; }
+.action-btn svg { width: 22px; height: 22px; display: block; }
+.btn-edit { color: var(--blue); }
+.btn-delete { color: var(--rose); }
+.action-btn:hover { background: var(--surface-2); transform: scale(1.15); }
+.action-btn:hover.btn-edit { color: var(--blue); }
+.action-btn:hover.btn-delete { color: var(--rose); }
+
 [data-theme="dark"]{
   --sidebar-bg:#0A2118;--sidebar-hover:rgba(255,255,255,0.07);
   --sidebar-active:rgba(75,191,128,0.18);--sidebar-text:rgba(255,255,255,0.58);
@@ -167,8 +203,8 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .form-icon{width:40px;height:40px;background:var(--green-50);border-radius:10px;
   display:flex;align-items:center;justify-content:center;color:var(--green-600)}
 
-.form-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:16px}
-.form-group{margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:20px}
+.form-group{margin-bottom:0}
 .form-label{display:block;font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px}
 .form-input,.form-select{width:100%;padding:10px 12px;border:1.5px solid var(--border);
   border-radius:8px;font-family:var(--font);font-size:14px;color:var(--text-primary);
@@ -192,13 +228,16 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 /* ── TABLE ── */
 .table-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .search-filter{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.search-input{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:40px;min-width:240px;flex:1;transition:border-color var(--transition),box-shadow var(--transition)}
+.search-input{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:40px;max-width:320px;flex:1;transition:border-color var(--transition),box-shadow var(--transition)}
 .search-input:focus-within{border-color:var(--green-400);box-shadow:0 0 0 3px rgba(43,165,99,0.08)}
 .search-input input{border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--text-primary);outline:none;width:100%;flex:1}
 .search-input input::placeholder{color:var(--text-muted)}
 .search-input .search-icon{color:var(--text-muted);flex-shrink:0}
-.filter-select{padding:0 12px;height:40px;border:1.5px solid var(--border);border-radius:10px;font-family:var(--font);font-size:13px;color:var(--text-primary);background:var(--surface);cursor:pointer;transition:border-color var(--transition),box-shadow var(--transition);min-width:160px}
+.filter-select{padding:0 12px;height:40px;border:1.5px solid var(--border);border-radius:10px;font-family:var(--font);font-size:13px;color:var(--text-primary);background:var(--surface);cursor:pointer;transition:border-color var(--transition),box-shadow var(--transition);min-width:220px}
 .filter-select:focus{outline:none;border-color:var(--green-400);box-shadow:0 0 0 3px rgba(43,165,99,0.08)}
+
+.btn-export{background:var(--green-500);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all var(--transition);box-shadow:0 2px 8px rgba(34,136,79,0.3);display:flex;align-items:center;gap:8px}
+.btn-export:hover{background:var(--green-600);transform:translateY(-1px);box-shadow:0 4px 14px rgba(34,136,79,0.4)}
 
 .farmers-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
   overflow:hidden;box-shadow:var(--shadow-sm)}
@@ -293,7 +332,7 @@ table.data-table{width:100%;border-collapse:collapse;font-size:13px}
         {% endif %}
       {% endwith %}
 
-      <form method="post" action="{{ url_for('dashboard_farmers') }}">
+      <form id="addFarmerForm" method="post" action="{{ url_for('dashboard_farmers') }}">
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Full Name *</label>
@@ -331,13 +370,33 @@ table.data-table{width:100%;border-collapse:collapse;font-size:13px}
           </div>
 
           <div class="form-group" style="display: flex; align-items: flex-end;">
-            <button type="submit" class="btn-primary" style="width: 100%; height: 42px;">Add Farmer</button>
+            <button type="submit" class="btn-primary" style="width: 100%; height: 48px; font-size: 16px;">Add Farmer</button>
           </div>
         </div>
       </form>
     </div>
 
-
+    <!-- Table Controls: Search & Filter -->
+    <div class="table-controls">
+      <div class="search-filter">
+        <div class="search-input">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><line x1="16" y1="16" x2="12.5" y2="12.5"/></svg>
+          <input type="text" id="farmerSearch" placeholder="Search farmers by name or phone..." onkeyup="filterFarmers()">
+        </div>
+        <select id="districtFilter" class="filter-select" onchange="filterFarmers()">
+          <option value="">All Districts</option>
+          {% for district in rwanda_districts %}
+            <option value="{{ district }}">{{ district }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="table-actions">
+        <button class="btn-export" onclick="exportFarmers()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
 
     <div class="farmers-table">
       <table class="data-table">
@@ -350,6 +409,7 @@ table.data-table{width:100%;border-collapse:collapse;font-size:13px}
             <th>Gender</th>
             <th>Joined</th>
             <th>Status</th>
+            <th style="text-align: right;">Actions</th>
           </tr>
         </thead>
         <tbody id="farmersTableBody">
@@ -372,6 +432,16 @@ table.data-table{width:100%;border-collapse:collapse;font-size:13px}
               <td>
                 <span class="status-badge s-active">Active</span>
               </td>
+              <td style="text-align: right;">
+                <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                  <button class="action-btn btn-edit" title="Edit Farmer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="action-btn btn-delete" title="Delete Farmer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                  </button>
+                </div>
+              </td>
             </tr>
           {% endfor %}
         </tbody>
@@ -380,7 +450,39 @@ table.data-table{width:100%;border-collapse:collapse;font-size:13px}
   </div>
 </div>
 
+<!-- Success Modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-content">
+    <div class="modal-title">Farmer Successfully added</div>
+    <div class="modal-text">Are you sure you want to add this farmer to your cooperative records?</div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-cancel" id="cancelBtn">Cancel</button>
+      <button class="btn-modal btn-ok" id="confirmBtn">OK</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// Modal Logic
+const form = document.getElementById('addFarmerForm');
+const modal = document.getElementById('successModal');
+const confirmBtn = document.getElementById('confirmBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    modal.style.display = 'flex';
+});
+
+confirmBtn.addEventListener('click', function() {
+    modal.style.display = 'none';
+    form.submit();
+});
+
+cancelBtn.addEventListener('click', function() {
+    modal.style.display = 'none';
+});
+
 // Rwanda districts for filter
 const rwandaDistricts = [
     "Kigali", "Nyarugenge", "Gasabo", "Kicukiro",
@@ -393,15 +495,16 @@ const rwandaDistricts = [
 // Filter farmers based on search and district
 function filterFarmers() {
     const searchTerm = document.getElementById('farmerSearch').value.toLowerCase();
-    const districtFilter = document.getElementById('districtFilter').value;
+    const districtFilter = document.getElementById('districtFilter').value.toLowerCase();
     const rows = document.querySelectorAll('#farmersTableBody tr');
     
     rows.forEach(row => {
         const farmerName = row.querySelector('.farmer-name').textContent.toLowerCase();
-        const farmerDistrict = row.cells[1].textContent.toLowerCase();
+        const farmerPhone = row.querySelector('.farmer-email').textContent.toLowerCase();
+        const farmerDistrict = row.cells[2].textContent.toLowerCase();
         
-        const matchesSearch = farmerName.includes(searchTerm);
-        const matchesDistrict = !districtFilter || farmerDistrict === districtFilter;
+        const matchesSearch = farmerName.includes(searchTerm) || farmerPhone.includes(searchTerm);
+        const matchesDistrict = !districtFilter || farmerDistrict.includes(districtFilter);
         
         row.style.display = (matchesSearch && matchesDistrict) ? '' : 'none';
     });
@@ -410,29 +513,35 @@ function filterFarmers() {
 // Export farmers to CSV
 function exportFarmers() {
     const table = document.querySelector('.data-table');
-    const rows = table.querySelectorAll('tbody tr');
+    if (!table) return;
     
-    let csv = 'Farmer Name,District,Farm Size,Gender,Joined,Status\n';
+    const rows = table.querySelectorAll('tbody tr');
+    let csv = 'Farmer Name,Phone,District,Farm Size,Gender,Joined,Status\n';
     
     rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const name = cells[0].querySelector('.farmer-name').textContent.trim();
-        const district = cells[1].textContent.trim();
-        const farmSize = cells[2].textContent.trim();
-        const gender = cells[3].textContent.trim();
-        const joined = cells[4].textContent.trim();
-        const status = cells[5].textContent.trim();
+        if (row.style.display === 'none') return;
         
-        csv += `"${name}","${district}","${farmSize}","${gender}","${joined}","${status}"\n`;
+        const cells = row.querySelectorAll('td');
+        const name = row.querySelector('.farmer-name').textContent.trim();
+        const phone = row.querySelector('.farmer-email').textContent.trim();
+        const district = cells[2].textContent.trim();
+        const farmSize = cells[3].textContent.trim();
+        const gender = cells[4].textContent.trim();
+        const joined = cells[5].textContent.trim();
+        const status = row.querySelector('.status-badge').textContent.trim();
+        
+        csv += `"${name}","${phone}","${district}","${farmSize}","${gender}","${joined}","${status}"\n`;
     });
     
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'farmers.csv';
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'farmers_list.csv');
+    document.body.appendChild(a);
     a.click();
-    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }
 
 // Theme toggle

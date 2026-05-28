@@ -180,6 +180,10 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
     background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;
 }
 
+.alert-error{
+    background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;
+}
+
 .form-group{margin-bottom:18px}
 
 @media(max-width:768px){

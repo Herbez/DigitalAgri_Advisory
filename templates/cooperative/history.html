@@ -44,6 +44,22 @@
   --transition:0.22s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* Enhanced Visibility & Font Sizes */
+.rec-table { font-size: 15px !important; }
+.rec-table th { font-size: 13px !important; padding: 16px !important; color: var(--text-primary) !important; background: var(--surface-2) !important; }
+.rec-table td { padding: 16px !important; color: var(--text-primary) !important; border-bottom: 1.5px solid var(--border) !important; }
+.farmer-cell-name { font-size: 16px !important; font-weight: 700 !important; }
+.farmer-cell-district { font-size: 14px !important; }
+
+/* Green View Button */
+.btn-view { background: var(--green-500) !important; color: #fff !important; border: none !important; padding: 8px 16px !important; }
+.btn-view:hover { background: var(--green-600) !important; transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.btn-view-icon { color: #fff !important; }
+
+/* Export Button */
+.btn-export { background: var(--green-500); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all var(--transition); box-shadow: 0 2px 8px rgba(34,136,79,0.3); display: flex; align-items: center; gap: 8px; }
+.btn-export:hover { background: var(--green-600); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(34,136,79,0.4); }
+
 [data-theme="dark"]{
   --sidebar-bg:#0A2118;--sidebar-hover:rgba(255,255,255,0.07);
   --sidebar-active:rgba(75,191,128,0.18);--sidebar-text:rgba(255,255,255,0.58);
@@ -341,13 +357,19 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
     <!-- Section 2: Recent Recommendations Table -->
     <div class="table-section">
       <div class="table-header">
-        <div>
+        <div style="display: flex; align-items: center; gap: 12px;">
           <span class="table-title">History Recommendations</span>
           <span class="count-badge">{{ recommendations|length if recommendations else 0 }}</span>
         </div>
-        <div class="table-search">
-          <svg class="search-icon" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><line x1="16" y1="16" x2="12.5" y2="12.5"/></svg>
-          <input type="text" id="tableSearch" placeholder="Search by farmer name..." onkeyup="filterTable()">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-end;">
+          <div class="table-search" style="max-width: 320px; flex: 1;">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><line x1="16" y1="16" x2="12.5" y2="12.5"/></svg>
+            <input type="text" id="tableSearch" placeholder="Search by farmer or district..." onkeyup="filterTable()">
+          </div>
+          <button class="btn-export" onclick="exportHistory()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
         </div>
       </div>
 
@@ -509,8 +531,47 @@ function filterTable() {
   
   rows.forEach(row => {
     const farmerName = row.querySelector('.farmer-cell-name').textContent.toLowerCase();
-    row.style.display = farmerName.includes(searchTerm) ? '' : 'none';
+    const district = row.cells[1].textContent.toLowerCase();
+    const crop = row.cells[3].textContent.toLowerCase();
+    
+    const matches = farmerName.includes(searchTerm) || 
+                    district.includes(searchTerm) || 
+                    crop.includes(searchTerm);
+                    
+    row.style.display = matches ? '' : 'none';
   });
+}
+
+// Export History to CSV
+function exportHistory() {
+    const table = document.querySelector('.rec-table');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    let csv = 'Farmer,Farm District,Season,Top Crop,Confidence,Date\n';
+    
+    rows.forEach(row => {
+        if (row.style.display === 'none') return;
+        
+        const farmer = row.querySelector('.farmer-cell-name').textContent.trim();
+        const district = row.cells[1].textContent.trim();
+        const season = row.querySelector('.season-badge').textContent.trim();
+        const crop = row.querySelector('.crop-cell').textContent.trim();
+        const confidence = row.querySelector('.confidence-badge').textContent.trim();
+        const date = row.cells[5].textContent.trim();
+        
+        csv += `"${farmer}","${district}","${season}","${crop}","${confidence}","${date}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'recommendation_history.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 // Theme toggle

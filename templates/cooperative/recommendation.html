@@ -206,6 +206,7 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 
 /* ── FIELD GRIDS ── */
 .field-grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 
 /* ── SUBMIT BUTTON ── */
@@ -295,7 +296,6 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
   .form-two-columns{grid-template-columns:1fr}
   .column-divider{display:none}
   .field-grid-2x2{grid-template-columns:1fr}
-  .field-grid-3{grid-template-columns:1fr}
   .table-header{flex-direction:column;align-items:stretch;gap:12px}
   .table-search{width:100%}
 }
@@ -426,23 +426,19 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
             <!-- Weather Data Group -->
             <div class="sub-group">
               <div class="sub-group-label">
-                <span class="pill-badge amber">From Meteo Rwanda</span>
-                <a href="https://www.meteorwanda.gov.rw/" target="_blank" class="external-link" style="margin-left:8px;">
+                <span class="pill-badge amber">Weather Data</span>
+                <a href="{{url_for('weather_forecast')}}" class="external-link" style="margin-left:8px;">
                   <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </a>
               </div>
-              <div class="field-grid-3">
-                <div class="form-group">
-                  <label class="form-label">Rainfall (mm)</label>
-                  <input type="number" class="form-input" name="rainfall" placeholder="mm" step="1">
-                </div>
+              <div class="field-grid-2">
                 <div class="form-group">
                   <label class="form-label">Temperature (°C)</label>
-                  <input type="number" class="form-input" name="temperature" placeholder="°C" step="0.1">
+                  <input type="number" class="form-input" name="temperature" placeholder="e.g. 26" step="0.1">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Humidity (%)</label>
-                  <input type="number" class="form-input" name="humidity" placeholder="%" step="1" min="0" max="100">
+                  <input type="number" class="form-input" name="humidity" placeholder="e.g. 72" step="1" min="0" max="100">
                 </div>
               </div>
             </div>
@@ -539,25 +535,44 @@ function selectSeason(btn) {
 
 // Form submission with animation
 document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+  e.preventDefault(); // Prevent immediate submission
+  
+  const form = this;
   const btn = document.getElementById('submitBtn');
   const btnText = btn.querySelector('.btn-submit-text');
-  const spinner = btn.querySelector('.spinner');
   
   btn.classList.add('loading');
-  btnText.textContent = 'Analyzing farm data...';
+  btnText.textContent = 'Gathering farm insights...';
   btn.disabled = true;
   
+  // Create an array of messages to show during the 10s wait
+  const messages = [
+    'Gathering farm insights...',
+    'Analyzing soil nutrients...',
+    'Checking weather patterns...',
+    'Consulting ML models...',
+    'Optimizing crop yields...',
+    'Finalizing recommendations...'
+  ];
+  
+  let msgIndex = 1;
+  const msgInterval = setInterval(() => {
+    if (msgIndex < messages.length) {
+      btnText.textContent = messages[msgIndex];
+      msgIndex++;
+    }
+  }, 1600);
+
   setTimeout(() => {
+    clearInterval(msgInterval);
     btn.classList.remove('loading');
     btn.classList.add('success');
-    btnText.textContent = 'Prediction ready! ✓';
+    btnText.textContent = 'Recommendation Ready! ✓';
     
     setTimeout(() => {
-      btn.classList.remove('success');
-      btnText.textContent = 'Get Recommendation →';
-      btn.disabled = false;
-    }, 1500);
-  }, 1500);
+      form.submit(); // Submit after the visual delay
+    }, 800);
+  }, 10000); // 10 second delay
 });
 
 // Filter table
