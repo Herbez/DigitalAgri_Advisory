@@ -8,6 +8,11 @@ class CooperativeStatus(enum.Enum):
     Active = 'Active'
     Disabled = 'Disabled'
 
+class UserRole(enum.Enum):
+    SuperAdmin = 'SuperAdmin'
+    CooperativeAdmin = 'CooperativeAdmin'
+    Farmer = 'Farmer'
+
 class Season(enum.Enum):
     A = 'Season A'
     B = 'Season B'
@@ -28,6 +33,7 @@ class Admin(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True)
     last_login = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # This Admin is our SuperAdmin!
 
     def get_id(self):
         return f'admin-{self.id}'
@@ -41,7 +47,10 @@ class Cooperative(UserMixin, db.Model):
     password = db.Column(db.String(255), nullable=False)
     phone_number = db.Column(db.String(20))
     district = db.Column(db.String(100))
+    status = db.Column(db.Enum(CooperativeStatus), default=CooperativeStatus.Active)  # Added status
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    farmers = db.relationship('Farmer', backref='cooperative', lazy=True, cascade='all, delete-orphan')
 
     def get_id(self):
         return f'coop-{self.id}'
@@ -60,7 +69,7 @@ class Farmer(UserMixin, db.Model):
     cooperative_id = db.Column(db.Integer, db.ForeignKey('cooperative.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    recommendations = db.relationship('Recommendation', backref='farmer', lazy=True)
+    recommendations = db.relationship('Recommendation', backref='farmer', lazy=True, cascade='all, delete-orphan')
 
     def get_id(self):
         return f'farmer-{self.id}'
@@ -84,7 +93,8 @@ class Recommendation(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     predictions = db.relationship('Prediction', backref='recommendation', lazy=True,
-                                  order_by='Prediction.confidence_score.desc()')
+                                  order_by='Prediction.confidence_score.desc()',
+                                  cascade='all, delete-orphan')
 
 
 class Prediction(db.Model):

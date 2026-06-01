@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DigitalAgri - SuperAdmin Dashboard</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --green-900:#0D3320;--green-800:#14472D;--green-700:#1A5C3A;
+  --green-600:#1E7045;--green-500:#22884F;--green-400:#2BA563;
+  --green-300:#4FBF80;--green-200:#A8DFBF;--green-100:#D4EFE0;--green-50:#EEF8F3;
+
+  --sidebar-bg:#14472D;--sidebar-hover:rgba(255,255,255,0.09);
+  --sidebar-active:rgba(255,255,255,0.16);--sidebar-text:rgba(255,255,255,0.72);
+  --sidebar-text-active:#fff;
+
+  --topbar-bg:#fff;--topbar-border:#E8EDF0;
+  --bg:#F2F6F3;--surface:#fff;--surface-2:#F7FAF8;
+  --border:#E4EBE7;--border-2:#D0DDD6;
+  --text-primary:#0F2419;--text-secondary:#4A6355;--text-muted:#8BAF94;
+
+  --blue:#3B82F6;--blue-light:#EFF6FF;
+  --amber:#F59E0B;--amber-light:#FFFBEB;
+  --rose:#F43F5E;--rose-light:#FFF1F2;
+  --violet:#8B5CF6;--violet-light:#F5F3FF;
+  --teal:#14B8A6;--teal-light:#F0FDFA;
+  --cyan:#06B6D4;--cyan-light:#ECFEFF;
+
+  --shadow-sm:0 1px 3px rgba(15,36,25,0.06),0 1px 2px rgba(15,36,25,0.04);
+  --shadow:0 4px 12px rgba(15,36,25,0.08),0 2px 4px rgba(15,36,25,0.04);
+  --shadow-md:0 8px 24px rgba(15,36,25,0.1),0 4px 8px rgba(15,36,25,0.05);
+  --shadow-lg:0 20px 48px rgba(15,36,25,0.12),0 8px 16px rgba(15,36,25,0.06);
+
+  --radius:12px;--radius-lg:16px;--radius-xl:20px;
+  --sidebar-w:248px;--topbar-h:64px;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --font-display:'Lora',Georgia,serif;
+  --transition:0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="dark"]{
+  --sidebar-bg:#0A2118;--sidebar-hover:rgba(255,255,255,0.07);
+  --sidebar-active:rgba(75,191,128,0.18);--sidebar-text:rgba(255,255,255,0.58);
+  --sidebar-text-active:#fff;
+  --topbar-bg:#0F1E16;--topbar-border:#1C3327;
+  --bg:#0C1A11;--surface:#112019;--surface-2:#162A1E;
+  --border:#1E3528;--border-2:#264538;
+  --text-primary:#E8F5EE;--text-secondary:#7BAF94;--text-muted:#4A7060;
+  --blue-light:#172554;--amber-light:#1C1400;--rose-light:#1F0A10;
+  --violet-light:#1B1030;--teal-light:#042F2E;--cyan-light:#083344;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.3);--shadow:0 4px 12px rgba(0,0,0,0.35);
+  --shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);
+}
+
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text-primary);transition:background var(--transition),color var(--transition)}
+
+.app{display:flex;height:100vh;overflow:hidden}
+
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-bg);
+  display:flex;flex-direction:column;z-index:20;position:relative;overflow:hidden;
+  transition:background var(--transition);
+}
+.sidebar::before{content:'';position:absolute;top:-80px;right:-60px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(75,191,128,0.1) 0%,transparent 70%);pointer-events:none}
+
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px 18px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.07)}
+.logo-mark{width:34px;height:34px;background:var(--green-400);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-name{font-family:var(--font-display);font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.2px}
+.logo-name span{color:var(--green-300)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:6px 10px 8px}
+.sidebar-nav::-webkit-scrollbar{width:0}
+
+.section-label{font-size:10px;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.35);
+  text-transform:uppercase;padding:14px 8px 5px}
+
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;
+  cursor:pointer;transition:all var(--transition);color:var(--sidebar-text);
+  font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--sidebar-hover);color:var(--sidebar-text-active)}
+.nav-item.active{background:var(--sidebar-active);color:var(--sidebar-text-active)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:60%;background:var(--green-300);border-radius:0 3px 3px 0}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.8}
+.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
+
+.nav-item.logout{color:rgba(255,120,120,0.7)}
+.nav-item.logout:hover{background:rgba(244,63,94,0.1);color:#ff7b7b}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+.topbar{height:var(--topbar-h);background:var(--topbar-bg);border-bottom:1px solid var(--topbar-border);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;z-index:10;
+  transition:background var(--transition),border-color var(--transition)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);flex:1}
+.breadcrumb a{color:var(--text-muted);text-decoration:none;transition:color var(--transition)}
+.breadcrumb a:hover{color:var(--green-500)}
+.breadcrumb .sep{font-size:11px}
+.breadcrumb .current{color:var(--text-primary);font-weight:700}
+
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.theme-toggle{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all var(--transition);font-size:15px;font-family:var(--font)}
+.theme-toggle:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-1px)}
+.user-btn{display:flex;align-items:center;gap:9px;padding:0 12px 0 6px;height:38px;
+  border-radius:10px;border:1.5px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all var(--transition);font-size:13px;font-weight:600;color:var(--text-primary)}
+.user-btn:hover{border-color:var(--green-400);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.avatar{width:26px;height:26px;border-radius:7px;
+  background:linear-gradient(135deg,var(--amber),#D97706);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+.content{flex:1;overflow-y:auto;padding:26px 26px 48px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:10px}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-title{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-0.3px;margin-bottom:4px}
+.page-sub{font-size:13.5px;color:var(--text-muted)}
+.header-actions{display:flex;gap:10px;align-items:center}
+.btn-primary{display:flex;align-items:center;gap:7px;padding:0 16px;height:38px;
+  background:var(--green-500);color:#fff;border:none;border-radius:10px;font-family:var(--font);
+  font-size:13.5px;font-weight:600;cursor:pointer;transition:all var(--transition);
+  box-shadow:0 2px 8px rgba(34,136,79,0.3)}
+.btn-primary:hover{background:var(--green-600);transform:translateY(-1px);box-shadow:0 4px 14px rgba(34,136,79,0.4)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;margin-bottom:20px}
+@media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.stats-grid{grid-template-columns:1fr}}
+
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:18px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+  transition:all var(--transition);
+  animation:slideUp 0.5s ease both;cursor:default}
+.stat-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-md)}
+.sc-green:hover{border-color:var(--green-400)}
+.sc-blue:hover{border-color:var(--blue)}
+.sc-amber:hover{border-color:var(--amber)}
+.sc-rose:hover{border-color:var(--rose)}
+.sc-violet:hover{border-color:var(--violet)}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;
+  border-radius:0 0 var(--radius-lg) var(--radius-lg);opacity:1;transition:all var(--transition)}
+.stat-card:hover::after{height:6px}
+.sc-green::after{background:linear-gradient(90deg,var(--green-400),var(--green-300))}
+.sc-blue::after{background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.sc-amber::after{background:linear-gradient(90deg,var(--amber),#FCD34D)}
+.sc-rose::after{background:linear-gradient(90deg,var(--rose),#FB7185)}
+.sc-violet::after{background:linear-gradient(90deg,var(--violet),#A78BFA)}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}
+.stat-card:nth-child(5){animation-delay:.25s}
+
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:14px}
+.sc-green .stat-icon{background:var(--green-50);color:var(--green-600)}
+.sc-blue .stat-icon{background:var(--blue-light);color:var(--blue)}
+.sc-amber .stat-icon{background:var(--amber-light);color:var(--amber)}
+.sc-rose .stat-icon{background:var(--rose-light);color:var(--rose)}
+.sc-violet .stat-icon{background:var(--violet-light);color:var(--violet)}
+[data-theme="dark"] .sc-green .stat-icon{background:rgba(75,191,128,0.12)}
+[data-theme="dark"] .sc-blue .stat-icon{background:rgba(59,130,246,0.12)}
+[data-theme="dark"] .sc-amber .stat-icon{background:rgba(245,158,11,0.12)}
+[data-theme="dark"] .sc-rose .stat-icon{background:rgba(244,63,94,0.12)}
+[data-theme="dark"] .sc-violet .stat-icon{background:rgba(139,92,246,0.12)}
+
+.stat-label{font-size:10.5px;font-weight:700;letter-spacing:0.08em;color:var(--text-muted);
+  text-transform:uppercase;margin-bottom:5px}
+.stat-value{font-size:26px;font-weight:700;color:var(--text-primary);line-height:1;
+  margin-bottom:6px;font-variant-numeric:tabular-nums}
+.stat-note{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
+
+.row-2{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:16px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:1100px){.row-2,.row-3{grid-template-columns:1fr}}
+
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;box-shadow:var(--shadow-sm);transition:box-shadow var(--transition),border-color var(--transition);
+  animation:slideUp 0.5s ease both}
+.chart-card:hover{box-shadow:var(--shadow)}
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-size:14.5px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+.chart-sub{font-size:12px;color:var(--text-muted)}
+.chart-wrap{position:relative;height:200px}
+
+.table-wrap{overflow-x:auto;margin-top:4px}
+table.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:0.07em;
+  text-transform:uppercase;color:var(--text-muted);padding:0 10px 10px 0;
+  border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table th:last-child{padding-right:0}
+.data-table td{padding:12px 10px 12px 0;border-bottom:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr{transition:background var(--transition);cursor:default;border-radius:8px}
+.data-table tbody tr:hover td{color:var(--text-primary);background:var(--surface-2)}
+
+.user-cell{display:flex;align-items:center;gap:10px}
+.u-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:11.5px;font-weight:700;color:#fff;flex-shrink:0}
+.u-name{font-weight:600;color:var(--text-primary);font-size:13.5px}
+.u-email{font-size:11.5px;color:var(--text-muted)}
+
+.status-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.s-active{background:#ECFDF5;color:#059669}[data-theme="dark"] .s-active{background:rgba(5,150,105,0.15);color:#34D399}
+.s-inactive{background:#F3F4F6;color:#6B7280}[data-theme="dark"] .s-inactive{background:rgba(107,114,128,0.15);color:#9CA3AF}
+.s-pending{background:#FFFBEB;color:#D97706}[data-theme="dark"] .s-pending{background:rgba(217,119,6,0.15);color:#FCD34D}
+
+.section-title{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.crop-bar-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.crop-bar-row:last-child{border-bottom:none}
+.crop-emoji{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+.crop-label{font-size:13px;font-weight:600;color:var(--text-primary);min-width:90px}
+.crop-bar-bg{flex:1;height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.crop-bar-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.crop-cnt{font-size:12px;font-weight:700;color:var(--text-muted);min-width:30px;text-align:right}
+
+.feed-item{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.feed-body{flex:1;min-width:0}
+.feed-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.feed-desc{font-size:12px;color:var(--text-muted);line-height:1.4}
+.feed-time{font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap}
+
+.action-btn{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;border:none;cursor:pointer;
+  transition:all var(--transition);font-family:var(--font);text-decoration:none;display:inline-block}
+.action-btn.green{background:var(--green-50);color:var(--green-700)}
+.action-btn.green:hover{background:var(--green-200)}
+.action-btn.amber{background:var(--amber-light);color:#92400E}
+.action-btn.amber:hover{background:#FDE68A}
+</style>
+</head>
+<body>
+<div class="app">
+
+{% include 'superadmin/components/sidebar.html' %}
+
+<div class="main">
+{% include 'superadmin/components/topbar.html' %}
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">SuperAdmin Dashboard</div>
+        <div class="page-sub">Manage the entire DigitalAgri platform</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card sc-green">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="16" height="14" rx="2"/><line x1="2" y1="8" x2="18" y2="8"/><line x1="7" y1="3" x2="7" y2="8"/><line x1="13" y1="3" x2="13" y2="8"/></svg></div>
+        <div class="stat-label">Total Cooperatives</div>
+        <div class="stat-value">{{ total_cooperatives }}</div>
+      </div>
+      <div class="stat-card sc-blue">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="6" r="3"/><path d="M2 18c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+        <div class="stat-label">Total Farmers</div>
+        <div class="stat-value">{{ total_farmers }}</div>
+      </div>
+      <div class="stat-card sc-violet">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="stat-label">Recommendations</div>
+        <div class="stat-value">{{ total_recommendations }}</div>
+      </div>
+      <div class="stat-card sc-amber">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="2,14 6,8 10,11 14,5 18,9"/></svg></div>
+        <div class="stat-label">Active Cooperatives</div>
+        <div class="stat-value">{{ active_cooperatives }}</div>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="chart-card" style="animation-delay:.3s">
+        <div class="chart-header">
+          <div><div class="chart-title">Top Crops Recommended</div><div class="chart-sub">Across all farmers and seasons</div></div>
+        </div>
+        <div id="topCropsWrap">
+          {% if top_crops_data %}
+            {% for crop in top_crops_data %}
+            <div class="crop-bar-row">
+              <div class="crop-emoji">{{ crop.emoji }}</div>
+              <div class="crop-label">{{ crop.name }}</div>
+              <div class="crop-bar-bg">
+                <div class="crop-bar-fill" style="width: {{ (crop.count / top_crops_data[0].count * 100) if top_crops_data[0].count > 0 else 0 }}%; background: {{ crop.color }}"></div>
+              </div>
+              <div class="crop-cnt">{{ crop.count }}</div>
+            </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="chart-card" style="animation-delay:.35s">
+        <div class="chart-header">
+          <div><div class="chart-title">Recent Cooperatives</div><div class="chart-sub">Latest cooperative signups</div></div>
+        </div>
+        <div id="recentCoops">
+          {% if recent_cooperatives %}
+            {% for coop in recent_cooperatives %}
+            <div class="feed-item">
+              <div class="feed-dot" style="background: var(--blue-light); color: var(--blue);">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="16" height="14" rx="2"/></svg>
+              </div>
+              <div class="feed-body">
+                <div class="feed-title">{{ coop.name }}</div>
+                <div class="feed-desc">{{ coop.email }} · {{ coop.district }}</div>
+              </div>
+              <div class="feed-time">{{ coop.created_at.strftime('%b %d') if coop.created_at else 'N/A' }}</div>
+            </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Recent Activity</div>
+    <div class="chart-card" style="animation-delay:.4s">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Farmer</th>
+              <th>District</th>
+              <th>Season</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for rec in recent_recommendations %}
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="u-avatar" style="background: linear-gradient(135deg,var(--green-500),var(--green-300));">
+                    {{ rec.farmer.name[:2] if rec.farmer else '??' }}
+                  </div>
+                  <div>
+                    <div class="u-name">{{ rec.farmer.name if rec.farmer else 'Unknown' }}</div>
+                    <div class="u-email">ID: {{ rec.farmer_id }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ rec.farm_district or 'N/A' }}</td>
+              <td>{{ rec.season.value if rec.season else 'N/A' }}</td>
+              <td>{{ rec.created_at.strftime('%Y-%m-%d') if rec.created_at else 'N/A' }}</td>
+              <td>
+                <a href="{{ url_for('recommendation_results', res_id=rec.id) }}" class="action-btn green">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = current === 'dark' ? '☀️' : '🌙';
+}
+</script>
+</body>
+</html>

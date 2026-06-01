@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DigitalAgri — Get Recommendation</title>
+<title>DigitalAgri — Get Recommendation (SuperAdmin)</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css"/>
@@ -60,15 +60,12 @@
 
 html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text-primary);transition:background var(--transition),color var(--transition)}
 
-/* ── APP SHELL ── */
 .app{display:flex;height:100vh;overflow:hidden}
 
-/* ── PAGE HEADER ── */
 .page-header{margin-bottom:26px}
 .page-title{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;margin-bottom:1px}
 .page-sub{font-size:14px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
 
-/* ── SIDEBAR ── */
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-bg);
   display:flex;flex-direction:column;z-index:20;position:relative;overflow:hidden;
@@ -83,8 +80,6 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
   display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo-name{font-family:var(--font-display);font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.2px}
 .logo-name span{color:var(--green-300)}
-.admin-badge{font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
-  background:rgba(245,158,11,0.25);color:#FCD34D;padding:2px 7px;border-radius:20px;margin-left:auto}
 
 .sidebar-nav{flex:1;overflow-y:auto;padding:6px 10px 8px}
 .sidebar-nav::-webkit-scrollbar{width:0}
@@ -101,14 +96,9 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
   width:3px;height:60%;background:var(--green-300);border-radius:0 3px 3px 0}
 .nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.8}
 .nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
-.nav-badge{margin-left:auto;background:rgba(244,63,94,0.25);color:#FDA4AF;
-  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
-.nav-badge.green{background:rgba(75,191,128,0.2);color:var(--green-200)}
 
-/* ── MAIN ── */
 .main{flex:1;overflow-y:auto;background:var(--bg)}
 
-/* ── TOPBAR ── */
 .topbar{height:var(--topbar-h);background:var(--topbar-bg);border-bottom:1px solid var(--topbar-border);
   display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:10;
   flex-shrink:0}
@@ -118,22 +108,7 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .breadcrumb .sep{color:var(--text-muted);font-weight:400}
 .breadcrumb .current{color:var(--text-primary);font-weight:500}
 
-.search-bar{display:flex;align-items:center;gap:7px;background:var(--surface);
-  border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:36px;min-width:280px;
-  transition:border-color var(--transition)}
-.search-bar:focus-within{border-color:var(--green-400);box-shadow:0 0 0 3px rgba(43,165,99,0.08)}
-.search-icon{color:var(--text-muted);flex-shrink:0}
-.search-bar input{border:none;background:transparent;font-family:var(--font);
-  font-size:13px;color:var(--text-primary);outline:none;width:100%;flex:1}
-.search-bar input::placeholder{color:var(--text-muted)}
-
 .topbar-actions{display:flex;align-items:center;gap:12px}
-.icon-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
-  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--text-muted);transition:all var(--transition);position:relative}
-.icon-btn:hover{border-color:var(--green-400);color:var(--green-600);transform:scale(1.05)}
-.notif-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--rose);
-  border-radius:50%;border:2px solid var(--topbar-bg)}
 .theme-toggle{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);
   background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
   color:var(--text-muted);transition:all var(--transition)}
@@ -146,10 +121,8 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
   background:linear-gradient(135deg,var(--amber),#D97706);
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
 
-/* ── CONTENT ── */
 .content{padding:24px;min-height:calc(100vh - var(--topbar-h))}
 
-/* ── FORM CARD ── */
 .form-card{background:var(--surface);border:0.5px solid var(--border-tertiary);border-radius:var(--radius-lg);
   padding:1.5rem;box-shadow:var(--shadow-sm);margin-bottom:24px}
 .card-header{margin-bottom:20px;padding-left:12px;border-left:3px solid var(--green-accent)}
@@ -157,7 +130,6 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .card-title{font-size:18px;font-weight:700;color:var(--text-primary);margin-top:4px}
 .card-subtitle{font-size:13px;color:var(--text-secondary);margin-top:2px}
 
-/* ── TWO COLUMN FORM ── */
 .form-two-columns{display:grid;grid-template-columns:1fr 1px 1fr;gap:24px}
 .column-divider{background:var(--border-tertiary);height:100%}
 .form-column{display:flex;flex-direction:column;gap:16px}
@@ -166,7 +138,6 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .column-header-icon{width:20px;height:20px;color:var(--green-accent)}
 .column-header-title{font-size:14px;font-weight:600;color:var(--text-primary)}
 
-/* ── FORM GROUPS ── */
 .form-group{margin-bottom:0}
 .form-label{display:block;font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px}
 .form-input,.form-select{width:100%;padding:10px 12px;border:1.5px solid var(--border);
@@ -178,13 +149,11 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .form-select{cursor:pointer}
 .form-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
 
-/* ── INFO CHIP ── */
 .info-chip{display:inline-flex;align-items:center;gap:6px;background:var(--green-50);
   color:var(--green-700);padding:6px 10px;border-radius:6px;font-size:12px;font-weight:500;
   margin-top:8px;animation:slideIn 0.3s ease-out}
 @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── SEASON TOGGLES ── */
 .season-toggles{display:flex;gap:8px}
 .season-toggle{flex:1;padding:10px 12px;border:1.5px solid var(--green-400);border-radius:8px;
   font-family:var(--font);font-size:13px;font-weight:600;color:var(--green-600);
@@ -192,24 +161,16 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .season-toggle:hover{background:var(--green-50)}
 .season-toggle.active{background:var(--green-accent);color:#fff;border-color:var(--green-accent)}
 
-/* ── ALTITUDE GLOW ── */
 .form-input.glow{border-color:var(--green-400);box-shadow:0 0 0 3px rgba(43,165,99,0.08)}
 
-/* ── SUB-GROUPS ── */
 .sub-group{margin-bottom:16px}
 .sub-group-label{display:flex;align-items:center;gap:6px;margin-bottom:10px}
 .pill-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:0.05em}
 .pill-badge.gray{background:var(--surface-2);color:var(--text-muted)}
 .pill-badge.amber{background:var(--amber-light);color:var(--amber)}
-.external-link{color:var(--text-muted);text-decoration:none;transition:color var(--transition)}
-.external-link:hover{color:var(--amber)}
 
-/* ── FIELD GRIDS ── */
 .field-grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 
-/* ── SUBMIT BUTTON ── */
 .btn-submit{width:100%;height:44px;background:var(--green-accent);color:#fff;border:none;
   border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);
   transition:all var(--transition);display:flex;align-items:center;justify-content:center;gap:8px;
@@ -220,75 +181,13 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .btn-submit-icon{width:16px;height:16px}
 .btn-submit.loading .btn-submit-text{display:none}
 .btn-submit.loading .spinner{display:block}
-.btn-submit.success{background:var(--green-700)}
 .spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);
   border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── TABLE SECTION ── */
-.table-section{margin-top:24px}
-.table-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.table-title{font-size:16px;font-weight:700;color:var(--text-primary)}
-.count-badge{background:var(--surface-2);color:var(--text-muted);font-size:12px;font-weight:600;
-  padding:4px 10px;border-radius:12px;margin-left:8px}
-.table-search{display:flex;align-items:center;gap:8px;background:var(--surface);
-  border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:36px;width:280px;
-  transition:border-color var(--transition)}
-.table-search:focus-within{border-color:var(--green-400);box-shadow:0 0 0 3px rgba(43,165,99,0.08)}
-.table-search input{border:none;background:transparent;font-family:var(--font);
-  font-size:13px;color:var(--text-primary);outline:none;width:100%;flex:1}
-.table-search input::placeholder{color:var(--text-muted)}
-
-/* ── RECOMMENDATIONS TABLE ── */
-.recommendations-table{background:var(--surface);border:0.5px solid var(--border-tertiary);
-  border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
-table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
-.rec-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:0.07em;
-  text-transform:uppercase;color:var(--text-muted);padding:12px 16px;border-bottom:1px solid var(--border-2)}
-.rec-table td{padding:12px 16px;border-bottom:1px solid var(--border);
-  color:var(--text-secondary);vertical-align:middle}
-.rec-table tbody tr{transition:background var(--transition);opacity:0;animation:fadeIn 0.3s ease-out forwards}
-.rec-table tbody tr:hover{background:var(--surface-2)}
-.rec-table tbody tr.new-row{border-left:3px solid var(--green-accent);background:var(--green-50);
-  animation:fadeInHighlight 0.3s ease-out forwards}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeInHighlight{from{opacity:0;transform:translateY(10px);background:var(--green-50)}
-  to{opacity:1;transform:translateY(0);background:var(--green-50)}}
-.rec-table tbody tr.new-row.fade-out{transition:background 3s ease-out;background:var(--surface)}
-
-.farmer-cell-name{font-weight:600;color:var(--text-primary);font-size:13px}
-.farmer-cell-district{font-size:11px;color:var(--text-muted);margin-top:2px}
-
-.season-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--amber-light);color:var(--amber)}
-
-.crop-cell{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-primary)}
-.crop-icon{width:14px;height:14px;color:var(--green-500)}
-
-.predictions-list{display:flex;flex-direction:column;gap:4px}
-.prediction-item{display:flex;align-items:center;gap:6px;font-size:12px}
-.prediction-rank{font-weight:600;color:var(--text-muted);min-width:20px}
-.prediction-crop{font-weight:600;color:var(--text-primary);flex:1}
-.prediction-confidence{font-weight:600;color:var(--green-600)}
-.no-predictions{color:var(--text-muted);font-size:13px}
-
-.confidence-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--green-50);color:var(--green-700)}
-
-.btn-view{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--border);
-  border-radius:6px;font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--surface);
-  cursor:pointer;transition:all var(--transition);text-decoration:none}
-.btn-view:hover{border-color:var(--green-400);color:var(--green-600)}
-.btn-view-icon{width:14px;height:14px}
-
-/* ── EMPTY STATE ── */
-.empty-state{text-align:center;padding:48px 24px}
-.empty-state-icon{width:48px;height:48px;color:var(--green-500);margin-bottom:16px}
-.empty-state-text{font-size:14px;color:var(--text-muted)}
-
 .nav-item.logout{color:rgba(255,120,120,0.7)}
 .nav-item.logout:hover{background:rgba(244,63,94,0.1);color:#ff7b7b}
 
-
-/* Responsive */
 @media(max-width:720px){
   :root{--sidebar-w:0px}
   .sidebar{display:none}
@@ -296,42 +195,62 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
   .form-two-columns{grid-template-columns:1fr}
   .column-divider{display:none}
   .field-grid-2x2{grid-template-columns:1fr}
-  .table-header{flex-direction:column;align-items:stretch;gap:12px}
-  .table-search{width:100%}
 }
 </style>
 </head>
 <body>
 <div class="app">
-{% include 'Farmer/components/sidebar.html' %}
+{% include 'superadmin/components/sidebar.html' %}
 
 <div class="main">
-  {% include 'Farmer/components/topbar.html' %}
+  <header class="topbar">
+    <div class="breadcrumb">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span class="sep">›</span>
+      <span class="current">Get Recommendation</span>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
+      <div class="user-btn">
+        <div class="avatar">{{ admin_name[:2] if admin_name else 'SA' }}</div>
+        {{ admin_name if admin_name else 'SuperAdmin' }}
+      </div>
+    </div>
+  </header>
 
   <div class="content">
-
     <div class="page-header">
         <div>
-          <div class="page-title">Get Crop Recommendation</div>
+          <div class="page-title">Get Crop Recommendation (SuperAdmin)</div>
           <div class="page-sub">
-          Enter farm conditions to get ML-based crop prediction
+          Enter farm conditions to get ML-based crop prediction for any farmer
           </div>
         </div>  
     </div>
-    <!-- Section 1: Form Card -->
 
     <div class="form-card">
-
-      <form id="recommendationForm" method="post" action="{{ url_for('get_recommendation') }}">
+      <form id="recommendationForm" method="post" action="{{ url_for('superadmin_recommendation') }}">
         <div class="form-two-columns">
-          <!-- Left Column -->
           <div class="form-column">
             <div class="column-header">
               <svg class="column-header-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <span class="column-header-title">Farm & Farmer Info</span>
             </div>
 
-            <input type="hidden" name="farmer_id" value="{{ farmers[0].id if farmers else current_user.id }}">
+            <div class="form-group">
+              <label class="form-label">Select Farmer</label>
+              <select class="form-select" id="farmerSelect" name="farmer_id" onchange="showFarmerDistrict()">
+                <option value="">Choose a farmer...</option>
+                {% for farmer in farmers %}
+                  <option value="{{ farmer.id }}" data-district="{{ farmer.farmer_district }}">{{ farmer.name }}</option>
+                {% endfor %}
+              </select>
+              <div id="farmerDistrictChip" class="info-chip" style="display:none;">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="farmerDistrictText">Home district: </span>
+              </div>
+            </div>
 
             <div class="form-group">
               <label class="form-label">Farm District</label>
@@ -360,17 +279,14 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
             </div>
           </div>
 
-          <!-- Divider -->
           <div class="column-divider"></div>
 
-          <!-- Right Column -->
           <div class="form-column">
             <div class="column-header">
               <svg class="column-header-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="2" y2="16"/></svg>
               <span class="column-header-title">Farm Conditions</span>
             </div>
 
-            <!-- Soil Data Group -->
             <div class="sub-group">
               <div class="sub-group-label">
                 <span class="pill-badge gray">Soil test results</span>
@@ -378,7 +294,7 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
               <div class="field-grid-2x2">
                 <div class="form-group">
                   <label class="form-label">Soil pH</label>
-                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5" min="4" max="8.5">
+                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5">
                   <div class="form-hint">Range: 4.0 – 8.5</div>
                 </div>
                 <div class="form-group">
@@ -396,15 +312,11 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
               </div>
             </div>
 
-            <!-- Weather Data Group -->
             <div class="sub-group">
               <div class="sub-group-label">
-                <span class="pill-badge amber">From Meteo Rwanda</span>
-                <a href="https://www.meteorwanda.gov.rw/" target="_blank" class="external-link" style="margin-left:8px;">
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                </a>
+                <span class="pill-badge amber">Weather Data</span>
               </div>
-              <div class="field-grid-2">
+              <div class="field-grid-2x2">
                 <div class="form-group">
                   <label class="form-label">Temperature (°C)</label>
                   <input type="number" class="form-input" name="temperature" placeholder="e.g. 26" step="0.1">
@@ -425,17 +337,28 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
         </button>
       </form>
     </div>
-
-
   </div>
 </div>
 </div>
 
 <script>
-// District data from CSV
 const districtAverages = {{ district_averages | safe }};
 
-// Suggest soil data and altitude based on district
+function showFarmerDistrict() {
+  const select = document.getElementById('farmerSelect');
+  const chip = document.getElementById('farmerDistrictChip');
+  const text = document.getElementById('farmerDistrictText');
+  
+  const selectedOption = select.options[select.selectedIndex];
+  if (selectedOption.value) {
+    const district = selectedOption.getAttribute('data-district');
+    text.textContent = 'Home district: ' + (district || 'Not specified');
+    chip.style.display = 'inline-flex';
+  } else {
+    chip.style.display = 'none';
+  }
+}
+
 function suggestAltitude() {
   const select = document.getElementById('farmDistrict');
   const altitudeInput = document.getElementById('altitude');
@@ -451,49 +374,33 @@ function suggestAltitude() {
   if (district && districtAverages[district]) {
     const data = districtAverages[district];
     
-    // Update altitude
     if (data.altitude) {
       hint.textContent = 'Suggested for ' + district + ': ~' + Math.round(data.altitude).toLocaleString() + 'm';
       hint.style.display = 'block';
       altitudeInput.classList.add('glow');
-      altitudeInput.value = Math.round(data.altitude); // Update even if not empty
+      altitudeInput.value = Math.round(data.altitude);
     }
     
-    // Update soil data - update even if not empty!
-    if (data.soil_ph) {
-      soilPhInput.value = data.soil_ph.toFixed(2);
-    }
-    if (data.nitrogen) {
-      nitrogenInput.value = data.nitrogen.toFixed(2);
-    }
-    if (data.phosphorus) {
-      phosphorusInput.value = data.phosphorus.toFixed(2);
-    }
-    if (data.potassium) {
-      potassiumInput.value = data.potassium.toFixed(2);
-    }
-    if (data.temperature) {
-      temperatureInput.value = data.temperature.toFixed(1);
-    }
-    if (data.humidity) {
-      humidityInput.value = Math.round(data.humidity);
-    }
+    if (data.soil_ph) soilPhInput.value = data.soil_ph.toFixed(2);
+    if (data.nitrogen) nitrogenInput.value = data.nitrogen.toFixed(2);
+    if (data.phosphorus) phosphorusInput.value = data.phosphorus.toFixed(2);
+    if (data.potassium) potassiumInput.value = data.potassium.toFixed(2);
+    if (data.temperature) temperatureInput.value = data.temperature.toFixed(1);
+    if (data.humidity) humidityInput.value = Math.round(data.humidity);
   } else {
     hint.style.display = 'none';
     altitudeInput.classList.remove('glow');
   }
 }
 
-// Season toggle selection
 function selectSeason(btn) {
   document.querySelectorAll('.season-toggle').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('selectedSeason').value = btn.getAttribute('data-season');
 }
 
-// Form submission with animation
 document.getElementById('recommendationForm').addEventListener('submit', function(e) {
-  e.preventDefault(); // Prevent immediate submission
+  e.preventDefault();
   
   const form = this;
   const btn = document.getElementById('submitBtn');
@@ -503,7 +410,6 @@ document.getElementById('recommendationForm').addEventListener('submit', functio
   btnText.textContent = 'Gathering farm insights...';
   btn.disabled = true;
   
-  // Create an array of messages to show during the 10s wait
   const messages = [
     'Gathering farm insights...',
     'Analyzing soil nutrients...',
@@ -528,33 +434,16 @@ document.getElementById('recommendationForm').addEventListener('submit', functio
     btnText.textContent = 'Recommendation Ready! ✓';
     
     setTimeout(() => {
-      form.submit(); // Submit after the visual delay
+      form.submit();
     }, 800);
-  }, 10000); // 10 second delay
+  }, 10000);
 });
 
-// Filter table
-function filterTable() {
-  const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
-  const rows = document.querySelectorAll('#recommendationsBody tr');
-  
-  rows.forEach(row => {
-    const farmerName = row.querySelector('.farmer-cell-name').textContent.toLowerCase();
-    row.style.display = farmerName.includes(searchTerm) ? '' : 'none';
-  });
-}
-
-// Theme toggle
 function toggleTheme(){
   const h=document.documentElement;
   const dark=h.getAttribute('data-theme')==='dark';
   h.setAttribute('data-theme',dark?'light':'dark');
   document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';
-}
-
-// View switching for sidebar
-function showView(viewName, element){
-  window.location.href = "{{ url_for('dashboard') }}";
 }
 </script>
 </body>

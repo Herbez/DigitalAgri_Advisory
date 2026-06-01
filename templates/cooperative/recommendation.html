@@ -382,7 +382,7 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
 
             <div class="form-group">
               <label class="form-label">Altitude (m)</label>
-              <input type="number" class="form-input" id="altitude" name="altitude" placeholder="e.g., 1800" step="10">
+              <input type="number" class="form-input" id="altitude" name="altitude" placeholder="e.g., 1800">
               <div id="altitudeHint" class="form-hint" style="display:none;"></div>
             </div>
           </div>
@@ -405,7 +405,7 @@ table.rec-table{width:100%;border-collapse:collapse;font-size:13px}
               <div class="field-grid-2x2">
                 <div class="form-group">
                   <label class="form-label">Soil pH</label>
-                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5" step="0.1">
+                  <input type="number" class="form-input" name="soil_ph" placeholder="e.g. 6.5">
                   <div class="form-hint">Range: 4.0 – 8.5</div>
                 </div>
                 <div class="form-group">
@@ -487,6 +487,8 @@ function suggestAltitude() {
   const nitrogenInput = document.querySelector('input[name="nitrogen"]');
   const phosphorusInput = document.querySelector('input[name="phosphorus"]');
   const potassiumInput = document.querySelector('input[name="potassium"]');
+  const temperatureInput = document.querySelector('input[name="temperature"]');
+  const humidityInput = document.querySelector('input[name="humidity"]');
   
   const district = select.value;
   if (district && districtAverages[district]) {
@@ -512,6 +514,12 @@ function suggestAltitude() {
     }
     if (data.potassium) {
       potassiumInput.value = data.potassium.toFixed(2);
+    }
+    if (data.temperature) {
+      temperatureInput.value = data.temperature.toFixed(1);
+    }
+    if (data.humidity) {
+      humidityInput.value = Math.round(data.humidity);
     }
   } else {
     hint.style.display = 'none';

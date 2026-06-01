@@ -76,16 +76,18 @@ def predict_crops(input_dict: dict, district: str = None, season: str = None) ->
     if not district or not season:
         # Fallback if no district/season provided
         return [
-            {'crop_name': 'Maize', 'confidence_score': round(random.uniform(60, 75), 2), 'source': 'fallback'},
-            {'crop_name': 'Beans', 'confidence_score': round(random.uniform(45, 55), 2), 'source': 'fallback'}
+            {'crop_name': 'Maize', 'confidence_score': round(random.uniform(85, 95), 2), 'source': 'fallback'},
+            {'crop_name': 'Beans', 'confidence_score': round(random.uniform(70, 80), 2), 'source': 'fallback'},
+            {'crop_name': 'Sweet Potato', 'confidence_score': round(random.uniform(55, 65), 2), 'source': 'fallback'}
         ]
 
     valid_crops = _get_whitelist_crops(district, season)
     
     if not valid_crops:
         return [
-            {'crop_name': 'Maize', 'confidence_score': round(random.uniform(60, 75), 2), 'source': 'district_fallback'},
-            {'crop_name': 'Beans', 'confidence_score': round(random.uniform(45, 55), 2), 'source': 'district_fallback'}
+            {'crop_name': 'Maize', 'confidence_score': round(random.uniform(85, 95), 2), 'source': 'district_fallback'},
+            {'crop_name': 'Beans', 'confidence_score': round(random.uniform(70, 80), 2), 'source': 'district_fallback'},
+            {'crop_name': 'Sweet Potato', 'confidence_score': round(random.uniform(55, 65), 2), 'source': 'district_fallback'}
         ]
 
     # Map whitelist crops to the required output format
@@ -93,10 +95,10 @@ def predict_crops(input_dict: dict, district: str = None, season: str = None) ->
     predictions = []
     
     # Random ranges:
-    # 1st: 60 - 75
-    # 2nd: 45 - 55
-    # 3rd: 5 - 35
-    ranges = [(60, 75), (45, 55), (5, 35)]
+    # 1st: 85 - 95
+    # 2nd: 70 - 80
+    # 3rd: 55 - 65
+    ranges = [(85, 95), (70, 80), (55, 65)]
     
     for i, crop in enumerate(valid_crops):
         # Limit to top 3 crops to match the specified ranges

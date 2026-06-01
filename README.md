@@ -82,12 +82,18 @@ Add `OPENWEATHER_API_KEY at line 17  in `app.py` and configure your OpenWeather 
 **Example Of Cooperative Admin:**
 
 ```bash
+#cooperative admin
 User: admin@ubumwe.rw
 password: 123456
-```
-## CREATE SUPER ADMIN
-```python init_superadmin.py --name "Super Admin" --email "superadmin@digitalagri.com" --password "password123"```
 
+#superAdmin 
+
+python init_superadmin.py --name "Super Admin" --email "superadmin@digitalagri.com" --password "password123"
+
+
+```
+
+---
 
 ## Project Structure
 - `app.py`: Main Flask application and routing.

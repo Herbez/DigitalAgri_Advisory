@@ -3,7 +3,7 @@ import json
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from __init__ import create_app, db, bcrypt
-from models import Admin, Cooperative, Farmer, Recommendation, Prediction, PlantingCalendar, Season, Gender
+from models import Admin, Cooperative, Farmer, Recommendation, Prediction, PlantingCalendar, Season, Gender, CooperativeStatus
 from ml.predictor import predict_crops, CROP_DISPLAY_NAMES
 from sqlalchemy import func
 import os
@@ -21,7 +21,9 @@ def load_district_data():
         'nitrogen': [],
         'phosphorus': [],
         'potassium': [],
-        'altitude': []
+        'altitude': [],
+        'temperature': [],
+        'humidity': []
     })
     
     csv_path = os.path.join(os.path.dirname(__file__), 'ml', 'ahs_dataset_nisr.csv')
@@ -36,6 +38,8 @@ def load_district_data():
                     if row.get('phosphorus'): district_data[district]['phosphorus'].append(float(row['phosphorus']))
                     if row.get('potassium'): district_data[district]['potassium'].append(float(row['potassium']))
                     if row.get('altitude_m'): district_data[district]['altitude'].append(float(row['altitude_m']))
+                    if row.get('avg_temperature_C'): district_data[district]['temperature'].append(float(row['avg_temperature_C']))
+                    if row.get('avg_humidity_pct'): district_data[district]['humidity'].append(float(row['avg_humidity_pct']))
                 except ValueError:
                     continue
     
@@ -47,7 +51,9 @@ def load_district_data():
             'nitrogen': sum(values['nitrogen']) / len(values['nitrogen']) if values['nitrogen'] else None,
             'phosphorus': sum(values['phosphorus']) / len(values['phosphorus']) if values['phosphorus'] else None,
             'potassium': sum(values['potassium']) / len(values['potassium']) if values['potassium'] else None,
-            'altitude': sum(values['altitude']) / len(values['altitude']) if values['altitude'] else None
+            'altitude': sum(values['altitude']) / len(values['altitude']) if values['altitude'] else None,
+            'temperature': sum(values['temperature']) / len(values['temperature']) if values['temperature'] else None,
+            'humidity': sum(values['humidity']) / len(values['humidity']) if values['humidity'] else None
         }
     return district_averages
 
@@ -77,6 +83,11 @@ CROP_EMOJIS = {
 @app.context_processor
 def inject_emojis():
     return dict(crop_emojis=CROP_EMOJIS)
+
+@app.context_processor
+def inject_enums():
+    from models import CooperativeStatus
+    return dict(CooperativeStatus=CooperativeStatus)
 
 # Rwanda districts list
 RWANDA_DISTRICTS = [
@@ -247,17 +258,364 @@ def logout():
 @login_required
 def dashboard():
     # Traffic controller for different dashboards
-    if isinstance(current_user, Cooperative):
+    if isinstance(current_user, Admin):
+        return superadmin_dashboard_view()
+    elif isinstance(current_user, Cooperative):
         return cooperative_dashboard_view()
     elif isinstance(current_user, Farmer):
         return farmer_dashboard_view()
-    else:
-        # Admin dashboard
-        total_cooperatives = Cooperative.query.count()
-        total_farmers = Farmer.query.count()
-        return render_template('cooperative/admin_dashboard.html',
-                             total_cooperatives=total_cooperatives,
-                             total_farmers=total_farmers)
+    return redirect(url_for('signin'))
+
+def superadmin_dashboard_view():
+    # Get all statistics for SuperAdmin
+    total_cooperatives = Cooperative.query.count()
+    total_farmers = Farmer.query.count()
+    total_recommendations = Recommendation.query.count()
+    total_predictions = Prediction.query.count()
+    
+    active_cooperatives = Cooperative.query.filter_by(status=CooperativeStatus.Active).count()
+    pending_cooperatives = Cooperative.query.filter_by(status=CooperativeStatus.Pending).count()
+    
+    recent_recommendations = Recommendation.query.order_by(Recommendation.created_at.desc()).limit(10).all()
+    recent_cooperatives = Cooperative.query.order_by(Cooperative.created_at.desc()).limit(5).all()
+    
+    # Top crops across all recommendations
+    colors = ['#22884F', '#3B82F6', '#F59E0B', '#8B5CF6', '#14B8A6', '#F43F5E']
+    top_crops = db.session.query(
+        Prediction.crop_name, 
+        func.count(Prediction.id).label('count')
+    ).group_by(Prediction.crop_name).order_by(func.count(Prediction.id).desc()).limit(6).all()
+    
+    top_crops_data = []
+    for i, (name, count) in enumerate(top_crops):
+        lookup_name = name.strip()
+        emoji = CROP_EMOJIS.get(lookup_name) or \
+                CROP_EMOJIS.get(lookup_name.replace('_', ' ').title()) or \
+                CROP_EMOJIS.get(lookup_name.lower()) or '🌱'
+        
+        top_crops_data.append({
+            'name': name.replace('_', ' ').title(),
+            'emoji': emoji,
+            'count': count,
+            'color': colors[i % len(colors)]
+        })
+    
+    return render_template('superadmin/superadmin_dashboard.html',
+                         total_cooperatives=total_cooperatives,
+                         total_farmers=total_farmers,
+                         total_recommendations=total_recommendations,
+                         total_predictions=total_predictions,
+                         active_cooperatives=active_cooperatives,
+                         pending_cooperatives=pending_cooperatives,
+                         recent_recommendations=recent_recommendations,
+                         recent_cooperatives=recent_cooperatives,
+                         top_crops_data=top_crops_data,
+                         admin_name=current_user.name)
+
+@app.route('/superadmin/cooperatives', methods=['GET', 'POST'])
+@login_required
+def superadmin_cooperatives():
+    if not isinstance(current_user, Admin):
+        flash('Access denied. Only SuperAdmin can manage cooperatives.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        coop_id = request.form.get('coop_id')
+        
+        if action == 'delete' and coop_id:
+            coop = Cooperative.query.get(int(coop_id))
+            if coop:
+                # Delete all farmers in the cooperative first
+                for farmer in coop.farmers:
+                    # Delete all recommendations for the farmer
+                    for rec in farmer.recommendations:
+                        # Delete all predictions for the recommendation
+                        for pred in rec.predictions:
+                            db.session.delete(pred)
+                        db.session.delete(rec)
+                    db.session.delete(farmer)
+                db.session.delete(coop)
+                db.session.commit()
+                flash('Cooperative deleted successfully!', 'success')
+            else:
+                flash('Cooperative not found!', 'error')
+        elif action == 'edit' and coop_id:
+            coop = Cooperative.query.get(int(coop_id))
+            if coop:
+                name = request.form.get('edit_name')
+                email = request.form.get('edit_email')
+                phone_number = request.form.get('edit_phone_number')
+                district = request.form.get('edit_district')
+                password = request.form.get('edit_password')
+                
+                if not all([name, email, district]):
+                    flash('Name, email, and district are required.', 'error')
+                else:
+                    coop.name = name
+                    coop.email = email
+                    coop.phone_number = phone_number
+                    coop.district = district
+                    if password:  # Only update password if provided
+                        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+                        coop.password = hashed_password
+                    db.session.commit()
+                    flash('Cooperative updated successfully!', 'success')
+            else:
+                flash('Cooperative not found!', 'error')
+        elif action == 'toggle_status' and coop_id:
+            coop = Cooperative.query.get_or_404(coop_id)
+            if coop.status == CooperativeStatus.Active:
+                coop.status = CooperativeStatus.Disabled
+            else:
+                coop.status = CooperativeStatus.Active
+            db.session.commit()
+            flash(f'Cooperative status updated to {coop.status.value}!', 'success')
+        elif action == 'add':
+            name = request.form.get('name')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            phone_number = request.form.get('phone_number')
+            district = request.form.get('district')
+            
+            if not all([name, email, password, district]):
+                flash('All required fields must be filled.', 'error')
+            else:
+                hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+                new_coop = Cooperative(
+                    name=name,
+                    email=email,
+                    password=hashed_password,
+                    phone_number=phone_number,
+                    district=district
+                )
+                db.session.add(new_coop)
+                db.session.commit()
+                flash('Cooperative added successfully!', 'success')
+    
+    cooperatives = Cooperative.query.all()
+    return render_template('superadmin/superadmin_cooperatives.html',
+                         cooperatives=cooperatives,
+                         admin_name=current_user.name,
+                         rwanda_districts=RWANDA_DISTRICTS)
+
+@app.route('/superadmin/farmers', methods=['GET', 'POST'])
+@login_required
+def superadmin_farmers():
+    if not isinstance(current_user, Admin):
+        flash('Access denied. Only SuperAdmin can manage farmers.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        # Check if we're deleting
+        delete_farmer_id = request.form.get('delete_farmer_id')
+        if delete_farmer_id:
+            farmer = Farmer.query.get(int(delete_farmer_id))
+            if farmer:
+                # Delete all recommendations and their predictions first
+                for rec in farmer.recommendations:
+                    for pred in rec.predictions:
+                        db.session.delete(pred)
+                    db.session.delete(rec)
+                db.session.delete(farmer)
+                db.session.commit()
+                flash('Farmer deleted successfully!', 'success')
+            else:
+                flash('Farmer not found!', 'error')
+        # Check if we're editing
+        elif request.form.get('edit_farmer_id'):
+            edit_farmer_id = int(request.form.get('edit_farmer_id'))
+            farmer = Farmer.query.get(edit_farmer_id)
+            if farmer:
+                name = request.form.get('edit_name')
+                phone_number = request.form.get('edit_phone_number')
+                farmer_district = request.form.get('edit_farmer_district')
+                farm_size_hectares = request.form.get('edit_farm_size_hectares')
+                gender_str = request.form.get('edit_gender')
+                cooperative_id = request.form.get('edit_cooperative_id')
+                
+                gender = None
+                if gender_str == 'Male':
+                    gender = Gender.Male
+                elif gender_str == 'Female':
+                    gender = Gender.Female
+                elif gender_str == 'Other':
+                    gender = Gender.Other
+                
+                farmer.name = name
+                farmer.phone_number = phone_number
+                farmer.farmer_district = farmer_district
+                farmer.farm_size_hectares = farm_size_hectares if farm_size_hectares else None
+                farmer.gender = gender
+                farmer.cooperative_id = int(cooperative_id) if cooperative_id else None
+                db.session.commit()
+                flash('Farmer updated successfully!', 'success')
+            else:
+                flash('Farmer not found!', 'error')
+        # Otherwise, add a new farmer
+        else:
+            # SuperAdmin can add farmers to any cooperative
+            name = request.form.get('name')
+            phone_number = request.form.get('phone_number')
+            farmer_district = request.form.get('farmer_district')
+            farm_size_hectares = request.form.get('farm_size_hectares')
+            gender_str = request.form.get('gender')
+            cooperative_id = request.form.get('cooperative_id')
+            
+            gender = None
+            if gender_str == 'Male':
+                gender = Gender.Male
+            elif gender_str == 'Female':
+                gender = Gender.Female
+            elif gender_str == 'Other':
+                gender = Gender.Other
+            
+            if not all([name, farmer_district]):
+                flash('Name and district are required.', 'error')
+            else:
+                new_farmer = Farmer(
+                    name=name,
+                    phone_number=phone_number,
+                    farmer_district=farmer_district,
+                    farm_size_hectares=farm_size_hectares if farm_size_hectares else None,
+                    gender=gender,
+                    cooperative_id=int(cooperative_id) if cooperative_id else None
+                )
+                db.session.add(new_farmer)
+                db.session.commit()
+                flash('Farmer added successfully!', 'success')
+    
+    farmers = Farmer.query.all()
+    cooperatives = Cooperative.query.all()
+    return render_template('superadmin/superadmin_farmers.html',
+                         farmers=farmers,
+                         cooperatives=cooperatives,
+                         admin_name=current_user.name,
+                         rwanda_districts=RWANDA_DISTRICTS)
+
+@app.route('/superadmin/reports')
+@login_required
+def superadmin_reports():
+    if not isinstance(current_user, Admin):
+        flash('Access denied. Only SuperAdmin can view reports.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Get comprehensive reports
+    all_recommendations = Recommendation.query.order_by(Recommendation.created_at.desc()).all()
+    all_predictions = Prediction.query.all()
+    
+    # Crop distribution
+    crop_distribution = db.session.query(
+        Prediction.crop_name,
+        func.count(Prediction.id).label('count')
+    ).group_by(Prediction.crop_name).order_by(func.count(Prediction.id).desc()).all()
+    
+    # Seasonal recommendations
+    seasonal_recs = {
+        'A': Recommendation.query.filter_by(season=Season.A).count(),
+        'B': Recommendation.query.filter_by(season=Season.B).count(),
+        'C': Recommendation.query.filter_by(season=Season.C).count()
+    }
+    
+    return render_template('superadmin/superadmin_reports.html',
+                         recommendations=all_recommendations,
+                         crop_distribution=crop_distribution,
+                         seasonal_recs=seasonal_recs,
+                         admin_name=current_user.name)
+
+@app.route('/superadmin/weather-forecast')
+@login_required
+def superadmin_weather_forecast():
+    if not isinstance(current_user, Admin):
+        flash('Access denied. Only SuperAdmin can view weather forecast.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('superadmin/superadmin_weather_forecast.html',
+                         admin_name=current_user.name,
+                         rwanda_districts=RWANDA_DISTRICTS)
+
+@app.route('/superadmin/recommendation', methods=['GET', 'POST'])
+@login_required
+def superadmin_recommendation():
+    if not isinstance(current_user, Admin):
+        flash('Access denied. Only SuperAdmin can create recommendations.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        farmer_id = request.form.get('farmer_id')
+        farm_district = request.form.get('farm_district')
+        season = request.form.get('season')
+        altitude = request.form.get('altitude')
+        soil_ph = request.form.get('soil_ph')
+        nitrogen = request.form.get('nitrogen')
+        phosphorus = request.form.get('phosphorus')
+        potassium = request.form.get('potassium')
+        rainfall = request.form.get('rainfall')
+        temperature = request.form.get('temperature')
+        humidity = request.form.get('humidity')
+        
+        if not all([farm_district, season, farmer_id]):
+            flash('Farm district, season, and farmer are required.', 'error')
+        else:
+            input_data = {
+                'soil_ph': float(soil_ph) if soil_ph else 6.5,
+                'nitrogen': float(nitrogen) if nitrogen else 50.0,
+                'phosphorus': float(phosphorus) if phosphorus else 30.0,
+                'potassium': float(potassium) if potassium else 40.0,
+                'rainfall': float(rainfall) if rainfall else 1000.0,
+                'temperature': float(temperature) if temperature else 22.0,
+                'humidity': float(humidity) if humidity else 70.0,
+                'altitude': float(altitude) if altitude else 1500.0,
+            }
+            
+            try:
+                predictions = predict_crops(input_data, district=farm_district, season=season)
+            except Exception as e:
+                predictions = [
+                    {'crop_name': 'Maize', 'confidence_score': 60.0, 'source': 'fallback'},
+                    {'crop_name': 'Beans', 'confidence_score': 25.0, 'source': 'fallback'},
+                    {'crop_name': 'Sweet Potato', 'confidence_score': 15.0, 'source': 'fallback'},
+                ]
+            
+            new_recommendation = Recommendation(
+                farmer_id=int(farmer_id),
+                farm_district=farm_district,
+                season=season,
+                altitude=float(altitude) if altitude else None,
+                soil_ph=float(soil_ph) if soil_ph else None,
+                nitrogen=float(nitrogen) if nitrogen else None,
+                phosphorus=float(phosphorus) if phosphorus else None,
+                potassium=float(potassium) if potassium else None,
+                rainfall=float(rainfall) if rainfall else None,
+                temperature=float(temperature) if temperature else None,
+                humidity=float(humidity) if humidity else None,
+            )
+            
+            try:
+                db.session.add(new_recommendation)
+                db.session.commit()
+                
+                for pred in predictions:
+                    db.session.add(Prediction(
+                        recommendation_id=new_recommendation.id,
+                        crop_name=pred['crop_name'],
+                        confidence_score=round(pred['confidence_score'], 2),
+                    ))
+                db.session.commit()
+                
+                return redirect(url_for('recommendation_results', res_id=new_recommendation.id))
+            except Exception as e:
+                db.session.rollback()
+                flash('Error saving recommendation.', 'error')
+    
+    farmers = Farmer.query.all()
+    recommendations = Recommendation.query.order_by(Recommendation.created_at.desc()).limit(50).all()
+    return render_template('superadmin/superadmin_recommendation.html',
+                         farmers=farmers,
+                         recommendations=recommendations,
+                         admin_name=current_user.name,
+                         rwanda_districts=RWANDA_DISTRICTS,
+                         district_averages=json.dumps(DISTRICT_AVERAGES))
 
 def cooperative_dashboard_view():
     # Get dashboard statistics for Cooperative
@@ -849,13 +1207,15 @@ def recommendation_results(res_id):
     
     cooperative_name = current_user.name if isinstance(current_user, Cooperative) else None
     farmer_name = current_user.name if isinstance(current_user, Farmer) else None
-    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative'
+    admin_name = current_user.name if isinstance(current_user, Admin) else None
+    template_folder = 'Farmer' if isinstance(current_user, Farmer) else 'cooperative' if isinstance(current_user, Cooperative) else 'superadmin'
     
     return render_template(f'{template_folder}/recommendation_results.html',
                          recommendation=recommendation,
                          predictions=predictions,
                          cooperative_name=cooperative_name,
-                         farmer_name=farmer_name)
+                         farmer_name=farmer_name,
+                         admin_name=admin_name)
 
 if __name__ == '__main__':
     with app.app_context():
